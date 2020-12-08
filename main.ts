@@ -1,4 +1,4 @@
-import { App, FileSystemAdapter, fuzzySearch, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TFile } from 'obsidian';
+import { App, FileSystemAdapter, fuzzySearch, MarkdownSourceView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TFile } from 'obsidian';
 import { Builder, Index } from 'lunr';
 
 // TODO
@@ -23,19 +23,28 @@ interface Entry {
 	id: string,
 	title?: string,
 	author?: Author[],
+	issued?: {"date-parts": [any[]]}
+}
+function getEntryYear(entry: Entry): string {
+	if (entry.issued && entry.issued["date-parts"] && entry.issued["date-parts"][0].length > 0)
+		return entry.issued["date-parts"][0][0];
+	return null;
 }
 
 export default class MyPlugin extends Plugin {
 	library: {[id: string]: Entry} = {};
 	index?: Index = null;
 
+	get editor(): CodeMirror.Editor {
+		let view = this.app.workspace.activeLeaf.view;
+		if (!(view instanceof MarkdownView))
+			return null;
+
+		let sourceView = view.sourceMode;
+		return (sourceView as MarkdownSourceView).cmEditor;
+	}
+
 	onload() {
-		console.log('loading plugin');
-
-		// const q: PreparedQuery = prepareQuery("foo");
-		// const text = "this is a test\nstring with foo\n and bar foo";
-		// console.log(fuzzySearch(q, text));
-
 		// Load library export
 		FileSystemAdapter.readLocalFile(BBT_EXPORT_PATH).then(buffer => this.onLibraryUpdate(buffer))
 
@@ -79,11 +88,16 @@ export default class MyPlugin extends Plugin {
 
 		b.field("id");
 		b.field("title");
+		b.field("authors");
+		b.field("year");
 
 		Object.values(this.library).forEach((entry: Entry) => {
 			b.add({
 				id: entry.id,
-				title: entry.title
+				title: entry.title,
+				authors: entry.author && entry.author.flatMap(a =>
+					[a.given, a.family, `${a.given} ${a.family}`]),
+				year: getEntryYear(entry)
 			})
 		})
 
@@ -104,6 +118,16 @@ export default class MyPlugin extends Plugin {
 		this.getOrCreateLiteratureNoteFile(citekey).then((file: TFile) => {
 			this.app.workspace.getLeaf(newPane).openFile(file)
 		});
+	}
+
+	async insertLiteratureNoteLink(citekey: string) {
+		this.getOrCreateLiteratureNoteFile(citekey).then(file => {
+			// TODO what is the API for this?
+			console.log(this.app.workspace.activeLeaf);
+
+			const linkText = `[[@${citekey}]]`;
+			this.editor.replaceRange(linkText, this.editor.getCursor());
+		})
 	}
 }
 
@@ -134,7 +158,7 @@ class SearchModal extends SuggestModal<Index.Result> {
 		super(app);
 		this.plugin = plugin;
 
-		this.inputEl.addEventListener("keyup", (ev) => this.onInputKeyup(ev))
+		// this.inputEl.addEventListener("keyup", (ev) => this.onInputKeyup(ev))
 
 		this.setInstructions([
 			{command: "↑↓", purpose: "to navigate"},
@@ -144,20 +168,27 @@ class SearchModal extends SuggestModal<Index.Result> {
 		])
 	}
 
-	onInputKeyup(ev: KeyboardEvent) {
-		// TODO finish
-		if (ev.key == "Enter") {
-			let newPane = ev.ctrlKey;
-			// TODO get the currently selected note
-			this.plugin.openLiteratureNote("ab", newPane)
-		}
+	// TODO need to get currently selected note
+	// onInputKeyup(ev: KeyboardEvent) {
+	// 	if (ev.key == "Enter") {
+	// 		let newPane = ev.ctrlKey;
+	// 		// TODO get the currently selected note
+	// 		this.plugin.openLiteratureNote("ab", newPane)
+	// 	}
+	// }
+}
+
+class OpenNoteModal extends SearchModal {
+	onChooseSuggestion(item: Index.Result, evt: MouseEvent | KeyboardEvent): void {
+		let newPane = evt instanceof KeyboardEvent && (evt as KeyboardEvent).ctrlKey;
+		this.plugin.openLiteratureNote(item.ref, newPane)
 	}
 }
 
 class InsertCitationModal extends SearchModal {
-	// onChooseSuggestion(value: Index.Result, evt: any): void {
-	// 	console.log("chose", value, this.plugin.library[value.ref]);
-	// }
+	onChooseSuggestion(item: Index.Result, evt: any): void {
+		this.plugin.insertLiteratureNoteLink(item.ref);
+	}
 }
 
 class SampleSettingTab extends PluginSettingTab {
