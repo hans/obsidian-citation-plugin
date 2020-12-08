@@ -1,54 +1,123 @@
-import { App, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, FileSystemAdapter, fuzzySearch, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TFile } from 'obsidian';
+import { Builder, Index } from 'lunr';
+
+// TODO
+const BBT_EXPORT_PATH = "/home/jon/Zotero/Meine Bibliothek.json";
+
+// function arrayBufferToString(buffer: ArrayBuffer): string {
+// 	// var ret = '';
+//   // var bytes = new Uint8Array(buffer);
+//   // var len = bytes.byteLength;
+//   // for (var i = 0; i < len; i++) {
+//   //   ret += String.fromCharCode(bytes[i]);
+//   // }
+//
+// }
+
+interface Author {
+	given?: string,
+	family?: string
+}
+
+interface Entry {
+	id: string,
+	title?: string,
+	author?: Author[],
+}
 
 export default class MyPlugin extends Plugin {
+	library: {[id: string]: Entry} = {};
+	index?: Index = null;
+
 	onload() {
 		console.log('loading plugin');
 
-		this.addRibbonIcon('dice', 'Sample Plugin', () => {
-			new Notice('This is a notice!');
-		});
+		// const q: PreparedQuery = prepareQuery("foo");
+		// const text = "this is a test\nstring with foo\n and bar foo";
+		// console.log(fuzzySearch(q, text));
 
-		this.addStatusBarItem().setText('Status Bar Text');
+		// Load library export
+		FileSystemAdapter.readLocalFile(BBT_EXPORT_PATH).then(buffer => this.onLibraryUpdate(buffer))
 
 		this.addCommand({
-			id: 'open-sample-modal',
-			name: 'Open Sample Modal',
-			// callback: () => {
-			// 	console.log('Simple Callback');
-			// },
+			id: "insert-citation",
+			name: "Insert citation",
 			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-					return true;
+				if (!checking) {
+					let modal = new InsertCitationModal(this.app, this);
+					modal.open();
 				}
-				return false;
 			}
-		});
+		})
+
+		this.addRibbonIcon("dice", "Sample Plugin", () => {
+			new InsertCitationModal(this.app, this).open();
+		})
 
 		this.addSettingTab(new SampleSettingTab(this.app, this));
+	}
 
-		this.registerEvent(this.app.on('codemirror', (cm: CodeMirror.Editor) => {
-			console.log('codemirror', cm);
-		}));
+	onLibraryUpdate(libraryBuffer: ArrayBuffer) {
+		// Decode file as UTF-8
+		var dataView = new DataView(libraryBuffer);
+		var decoder = new TextDecoder("utf8");
+		const value = decoder.decode(dataView);
 
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		let libraryArray = JSON.parse(value);
+		// Index by bibtex code
+		console.log("here", libraryArray.length)
+		this.library = Object.fromEntries(libraryArray.map((entry: Entry) => [entry.id, entry]))
+		this.rebuildIndex()
 	}
 
 	onunload() {
 		console.log('unloading plugin');
 	}
+
+	rebuildIndex() {
+		let b = new Builder();
+
+		b.field("id");
+		b.field("title");
+
+		Object.values(this.library).forEach((entry: Entry) => {
+			b.add({
+				id: entry.id,
+				title: entry.title
+			})
+		})
+
+		console.log("here")
+		this.index = b.build();
+	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
+class SearchModal extends SuggestModal<Index.Result> {
+	plugin: MyPlugin;
+
+  getSuggestions(query: string): Index.Result[] {
+    return this.plugin.index.search(query);
+  };
+
+  renderSuggestion(result: Index.Result, el: HTMLElement): void {
+		el.empty();
+		let entry = this.plugin.library[result.ref];
+
+		let authorText = entry.author ? entry.author.map(a => `${a.given} ${a.family}`).join(", ") : "";
+
+		let container = el.createEl("div", {cls: "zoteroResult"});
+		container.createEl("span", {cls: "zoteroTitle", text: entry.title});
+		container.createEl("span", {cls: "zoteroCitekey", text: entry.id});
+		container.createEl("span", {cls: "zoteroAuthors", text: authorText});
+  }
+
+  onChooseSuggestion(item: Index.Result, evt: MouseEvent | KeyboardEvent): void {
+    console.log(item, evt);
+  }
+
+	constructor(app: App, plugin: MyPlugin) {
 		super(app);
+		this.plugin = plugin;
 	}
 
 	onOpen() {
@@ -59,6 +128,12 @@ class SampleModal extends Modal {
 	onClose() {
 		let {contentEl} = this;
 		contentEl.empty();
+	}
+}
+
+class InsertCitationModal extends SearchModal {
+	onChooseSuggestion(value: Index.Result, evt: any): void {
+		console.log("chose", value, this.plugin.library[value.ref]);
 	}
 }
 
