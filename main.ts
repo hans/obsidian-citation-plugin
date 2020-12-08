@@ -133,8 +133,11 @@ export default class MyPlugin extends Plugin {
 
 class SearchModal extends SuggestModal<Index.Result> {
 	plugin: MyPlugin;
+	limit = 50;
 
   getSuggestions(query: string): Index.Result[] {
+		if (query == "")
+			return [];
     return this.plugin.index.search(query);
   };
 
