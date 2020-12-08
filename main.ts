@@ -31,7 +31,14 @@ function getEntryYear(entry: Entry): string {
 	return null;
 }
 
+
+class CitationsPluginSettings {
+	public citationExportPath: string;
+}
+
+
 export default class MyPlugin extends Plugin {
+	settings: CitationsPluginSettings
 	library: {[id: string]: Entry} = {};
 	index?: Index = null;
 
@@ -44,9 +51,32 @@ export default class MyPlugin extends Plugin {
 		return (sourceView as MarkdownSourceView).cmEditor;
 	}
 
+	async loadSettings() {
+		this.settings = new CitationsPluginSettings();
+
+		const loadedSettings = await this.loadData();
+		if (!loadedSettings)
+			return;
+
+		if ("citationExportPath" in loadedSettings)
+			this.settings.citationExportPath = loadedSettings.citationExportPath;
+	}
+
+	async saveSettings() {
+		this.saveData(this.settings);
+	}
+
 	onload() {
+		this.loadSettings().then(() => this.init());
+	}
+
+	init() {
 		// Load library export
-		FileSystemAdapter.readLocalFile(BBT_EXPORT_PATH).then(buffer => this.onLibraryUpdate(buffer))
+		if (this.settings.citationExportPath) {
+			FileSystemAdapter.readLocalFile(this.settings.citationExportPath).then(buffer => this.onLibraryUpdate(buffer))
+		} else {
+			console.warn("Citations plugin: citation export path is not set. Please update plugin settings.");
+		}
 
 		this.addCommand({
 			id: "insert-citation",
@@ -63,7 +93,7 @@ export default class MyPlugin extends Plugin {
 			new InsertCitationModal(this.app, this).open();
 		})
 
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new CitationsSettingTab(this.app, this));
 	}
 
 	onLibraryUpdate(libraryBuffer: ArrayBuffer) {
@@ -73,8 +103,7 @@ export default class MyPlugin extends Plugin {
 		const value = decoder.decode(dataView);
 
 		let libraryArray = JSON.parse(value);
-		// Index by bibtex code
-		console.log("here", libraryArray.length)
+		// Index by citekey
 		this.library = Object.fromEntries(libraryArray.map((entry: Entry) => [entry.id, entry]))
 		this.rebuildIndex()
 	}
@@ -194,22 +223,33 @@ class InsertCitationModal extends SearchModal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
+class CitationsSettingTab extends PluginSettingTab {
+
+	private plugin: MyPlugin;
+
+	constructor(app: App, plugin: MyPlugin) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
 	display(): void {
 		let {containerEl} = this;
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
+		containerEl.createEl('h2', {text: 'Citation plugin settings'});
+
+		// new Setting(containerEl)
+		// 	.setName("Citation manager")
+		// 	.addDropdown(dropdown => dropdown.addOptions({zotero: "Zotero"}));
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text.setPlaceholder('Enter your secret')
-				.setValue('')
-				.onChange((value) => {
-					console.log('Secret: ' + value);
-				}));
-
+				.setName("Citation export path")
+				.addText(input => input.setPlaceholder("/path/to/export.json")
+					.setValue(this.plugin.settings.citationExportPath).onChange(value => {
+						this.plugin.settings.citationExportPath = value;
+						this.plugin.saveSettings();
+						this.display();
+					}))
 	}
 }
