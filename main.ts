@@ -87,8 +87,23 @@ export default class MyPlugin extends Plugin {
 			})
 		})
 
-		console.log("here")
 		this.index = b.build();
+	}
+
+	async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {
+		let path = `Reading notes/@${citekey}.md`,
+				file = this.app.vault.getAbstractFileByPath(path);
+
+		if (file == null)
+			file = await this.app.vault.create(path, "");
+
+		return file as TFile;
+	}
+
+	async openLiteratureNote(citekey: string, newPane: boolean): Promise<void> {
+		this.getOrCreateLiteratureNoteFile(citekey).then((file: TFile) => {
+			this.app.workspace.getLeaf(newPane).openFile(file)
+		});
 	}
 }
 
@@ -112,29 +127,37 @@ class SearchModal extends SuggestModal<Index.Result> {
   }
 
   onChooseSuggestion(item: Index.Result, evt: MouseEvent | KeyboardEvent): void {
-    console.log(item, evt);
+    this.plugin.openLiteratureNote(item.ref, false);
   }
 
 	constructor(app: App, plugin: MyPlugin) {
 		super(app);
 		this.plugin = plugin;
+
+		this.inputEl.addEventListener("keyup", (ev) => this.onInputKeyup(ev))
+
+		this.setInstructions([
+			{command: "↑↓", purpose: "to navigate"},
+			{command: "↵", purpose: "to open literature note"},
+			{command: "ctrl ↵", purpose: "to open literature note in a new pane"},
+			{command: "esc", purpose: "to dismiss"},
+		])
 	}
 
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		let {contentEl} = this;
-		contentEl.empty();
+	onInputKeyup(ev: KeyboardEvent) {
+		// TODO finish
+		if (ev.key == "Enter") {
+			let newPane = ev.ctrlKey;
+			// TODO get the currently selected note
+			this.plugin.openLiteratureNote("ab", newPane)
+		}
 	}
 }
 
 class InsertCitationModal extends SearchModal {
-	onChooseSuggestion(value: Index.Result, evt: any): void {
-		console.log("chose", value, this.plugin.library[value.ref]);
-	}
+	// onChooseSuggestion(value: Index.Result, evt: any): void {
+	// 	console.log("chose", value, this.plugin.library[value.ref]);
+	// }
 }
 
 class SampleSettingTab extends PluginSettingTab {
