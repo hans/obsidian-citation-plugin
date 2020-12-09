@@ -1,5 +1,5 @@
 import { AbstractTextComponent, App, FileSystemAdapter, FuzzyMatch, fuzzySearch, FuzzySuggestModal, MarkdownSourceView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TextComponent, TFile } from 'obsidian';
-import { InsertCitationModal } from './modals';
+import { InsertCitationModal, OpenNoteModal } from './modals';
 
 import { CitationsPluginSettings, CitationsSettingTab, IIndexable } from './settings';
 import { Entry, EntryData } from './types';
@@ -52,10 +52,16 @@ export default class MyPlugin extends Plugin {
 
 		// TODO subscribe to library updates
 
-		// Pre-compile templating functions
-		this.literatureNoteTitleTemplate = Handlebars.compile(this.settings.literatureNoteTitleTemplate);
-		this.literatureNotePathTemplate = Handlebars.compile(this.settings.literatureNotePathTemplate);
-		this.literatureNoteContentTemplate = Handlebars.compile(this.settings.literatureNoteContentTemplate);
+		this.addCommand({
+			id: "open-literature-note",
+			name: "Open literature note",
+			checkCallback: (checking: boolean) => {
+				if (!checking) {
+					let modal = new OpenNoteModal(this.app, this);
+					modal.open();
+				}
+			}
+		})
 
 		this.addCommand({
 			id: "insert-citation",
@@ -66,10 +72,6 @@ export default class MyPlugin extends Plugin {
 					modal.open();
 				}
 			}
-		})
-
-		this.addRibbonIcon("dice", "Sample Plugin", () => {
-			new InsertCitationModal(this.app, this).open();
 		})
 
 		this.addSettingTab(new CitationsSettingTab(this.app, this));
