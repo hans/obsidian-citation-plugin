@@ -1,11 +1,11 @@
-import { AbstractTextComponent, App, FileSystemAdapter, FuzzyMatch, fuzzySearch, FuzzySuggestModal, MarkdownSourceView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TextComponent, TFile } from 'obsidian';
+import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, Plugin, TFile } from 'obsidian';
 import { InsertCitationModal, OpenNoteModal } from './modals';
 
-import { CitationsPluginSettings, CitationsSettingTab, IIndexable } from './settings';
+import { CitationsPluginSettings, CitationSettingTab, IIndexable } from './settings';
 import { Entry, EntryData } from './types';
 
 
-export default class MyPlugin extends Plugin {
+export default class CitationPlugin extends Plugin {
 	settings: CitationsPluginSettings;
 	library: {[id: string]: Entry} = {};
 
@@ -71,7 +71,7 @@ export default class MyPlugin extends Plugin {
 			}
 		})
 
-		this.addSettingTab(new CitationsSettingTab(this.app, this));
+		this.addSettingTab(new CitationSettingTab(this.app, this));
 	}
 
 	async loadLibrary() {

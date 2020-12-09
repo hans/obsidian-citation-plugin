@@ -1,6 +1,6 @@
 import * as Handlebars from "handlebars";
 import { AbstractTextComponent, App, PluginSettingTab, Setting } from "obsidian";
-import MyPlugin from "./main";
+import CitationPlugin from "./main";
 
 // Trick: allow string indexing onto object properties
 export interface IIndexable {
@@ -28,25 +28,31 @@ export class CitationsPluginSettings {
 }
 
 
-export class CitationsSettingTab extends PluginSettingTab {
+export class CitationSettingTab extends PluginSettingTab {
 
-	private plugin: MyPlugin;
+	private plugin: CitationPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: CitationPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
-	addTextChangeCallback(component: AbstractTextComponent<any>, settingsKey: string): void {
+	addTextChangeCallback(component: AbstractTextComponent<any>, settingsKey: string,
+                        cb?: ((value: string) => void)): void {
 		component.onChange(async (value) => {
 			(this.plugin.settings as IIndexable)[settingsKey] = value;
-			this.plugin.saveSettings();
+      this.plugin.saveSettings().then(() => {
+        if (cb) {
+          cb(value);
+        }
+      })
 		})
 	}
 
-	buildTextInput(component: AbstractTextComponent<any>, settingsKey: string): void {
+	buildTextInput(component: AbstractTextComponent<any>, settingsKey: string,
+                 cb?: ((value: string) => void)): void {
 		component.setValue((this.plugin.settings as IIndexable)[settingsKey]);
-		this.addTextChangeCallback(component, settingsKey);
+		this.addTextChangeCallback(component, settingsKey, cb);
 	}
 
 	display(): void {
@@ -56,13 +62,13 @@ export class CitationsSettingTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', {text: 'Citation plugin settings'});
 
-		// new Setting(containerEl)
-		// 	.setName("Citation manager")
-		// 	.addDropdown(dropdown => dropdown.addOptions({zotero: "Zotero"}));
-
+    // NB: we force reload of the library on path change.
 		new Setting(containerEl)
 				.setName("Citation export path")
-				.addText(input => this.buildTextInput(input.setPlaceholder("/path/to/export.json"), "citationExportPath"));
+				.addText(input => this.buildTextInput(
+          input.setPlaceholder("/path/to/export.json"),
+          "citationExportPath",
+          (_) => this.plugin.loadLibrary()));
 
 		containerEl.createEl("h3", {text: "Literature note settings"});
 
