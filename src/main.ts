@@ -55,22 +55,24 @@ export default class MyPlugin extends Plugin {
 		this.addCommand({
 			id: "open-literature-note",
 			name: "Open literature note",
-			checkCallback: (checking: boolean) => {
-				if (!checking) {
-					let modal = new OpenNoteModal(this.app, this);
-					modal.open();
-				}
+			hotkeys: [
+				{modifiers: ["Ctrl", "Shift"], key: "o"},
+			],
+			callback: () => {
+				let modal = new OpenNoteModal(this.app, this);
+				modal.open();
 			}
 		})
 
 		this.addCommand({
 			id: "insert-citation",
 			name: "Insert citation",
-			checkCallback: (checking: boolean) => {
-				if (!checking) {
-					let modal = new InsertCitationModal(this.app, this);
-					modal.open();
-				}
+			hotkeys: [
+				{modifiers: ["Ctrl", "Shift"], key: "i"},
+			],
+			callback: () => {
+				let modal = new InsertCitationModal(this.app, this);
+				modal.open();
 			}
 		})
 
