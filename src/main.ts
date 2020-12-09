@@ -1,18 +1,13 @@
-import * as Handlebars from 'handlebars';
 import { AbstractTextComponent, App, FileSystemAdapter, FuzzyMatch, fuzzySearch, FuzzySuggestModal, MarkdownSourceView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TextComponent, TFile } from 'obsidian';
 import { InsertCitationModal } from './modals';
 
-import { CitationsPluginSettings, CitationsSettingTab } from './settings';
+import { CitationsPluginSettings, CitationsSettingTab, IIndexable } from './settings';
 import { Entry, EntryData } from './types';
 
 
 export default class MyPlugin extends Plugin {
 	settings: CitationsPluginSettings;
 	library: {[id: string]: Entry} = {};
-
-	private literatureNoteTitleTemplate: HandlebarsTemplateDelegate;
-	private literatureNotePathTemplate: HandlebarsTemplateDelegate;
-	private literatureNoteContentTemplate: HandlebarsTemplateDelegate;
 
 	get editor(): CodeMirror.Editor {
 		let view = this.app.workspace.activeLeaf.view;
@@ -30,12 +25,17 @@ export default class MyPlugin extends Plugin {
 		if (!loadedSettings)
 			return;
 
-		if ("citationExportPath" in loadedSettings)
-			this.settings.citationExportPath = loadedSettings.citationExportPath;
+		const toLoad = ["citationExportPath", "_literatureNoteTitleTemplate",
+									  "_literatureNotePathTemplate", "_literatureNoteContentTemplate"]
+		toLoad.forEach(setting => {
+			if (setting in loadedSettings) {
+				(this.settings as IIndexable)[setting] = loadedSettings[setting];
+			}
+		})
 	}
 
 	async saveSettings() {
-		this.saveData(this.settings);
+		await this.saveData(this.settings);
 	}
 
 	onload() {
@@ -92,8 +92,9 @@ export default class MyPlugin extends Plugin {
 
 	getTitleForCitekey(citekey: string): string {
 		let entry = this.library[citekey];
-		return this.literatureNoteTitleTemplate({
+		return this.settings.literatureNoteTitleTemplate({
 			citekey: citekey,
+			title: entry.title,
 			authors: entry.authors,
 			authorString: entry.authorString,
 			year: entry.year
@@ -102,13 +103,14 @@ export default class MyPlugin extends Plugin {
 
 	getPathForCitekey(citekey: string): string {
 		let title = this.getTitleForCitekey(citekey);
-		return this.literatureNotePathTemplate({noteTitle: title});
+		return this.settings.literatureNotePathTemplate({noteTitle: title});
 	}
 
 	getInitialContentForCitekey(citekey: string): string {
 		let entry = this.library[citekey];
-		return this.literatureNoteContentTemplate({
+		return this.settings.literatureNoteContentTemplate({
 			citekey: citekey,
+			title: entry.title,
 			authors: entry.authors,
 			authorString: entry.authorString,
 			year: entry.year
@@ -119,8 +121,9 @@ export default class MyPlugin extends Plugin {
 		let path = this.getPathForCitekey(citekey),
 				file = this.app.vault.getAbstractFileByPath(path);
 
-		if (file == null)
-			file = await this.app.vault.create(path, "");
+		if (file == null) {
+			file = await this.app.vault.create(path, this.getInitialContentForCitekey(citekey));
+		}
 
 		return file as TFile;
 	}
