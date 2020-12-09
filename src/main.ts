@@ -43,12 +43,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	init() {
-		// Load library export
-		if (this.settings.citationExportPath) {
-			FileSystemAdapter.readLocalFile(this.settings.citationExportPath).then(buffer => this.onLibraryUpdate(buffer))
-		} else {
-			console.warn("Citations plugin: citation export path is not set. Please update plugin settings.");
-		}
+		this.loadLibrary();
 
 		// TODO subscribe to library updates
 
@@ -77,6 +72,14 @@ export default class MyPlugin extends Plugin {
 		})
 
 		this.addSettingTab(new CitationsSettingTab(this.app, this));
+	}
+
+	async loadLibrary() {
+		if (this.settings.citationExportPath) {
+			FileSystemAdapter.readLocalFile(this.settings.citationExportPath).then(buffer => this.onLibraryUpdate(buffer))
+		} else {
+			console.warn("Citations plugin: citation export path is not set. Please update plugin settings.");
+		}
 	}
 
 	onLibraryUpdate(libraryBuffer: ArrayBuffer) {
