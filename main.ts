@@ -1,19 +1,6 @@
 import { App, FileSystemAdapter, fuzzySearch, MarkdownSourceView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TFile } from 'obsidian';
 import { Builder, Index } from 'lunr';
 
-// TODO
-const BBT_EXPORT_PATH = "/home/jon/Zotero/Meine Bibliothek.json";
-
-// function arrayBufferToString(buffer: ArrayBuffer): string {
-// 	// var ret = '';
-//   // var bytes = new Uint8Array(buffer);
-//   // var len = bytes.byteLength;
-//   // for (var i = 0; i < len; i++) {
-//   //   ret += String.fromCharCode(bytes[i]);
-//   // }
-//
-// }
-
 interface Author {
 	given?: string,
 	family?: string
