@@ -1,4 +1,4 @@
-import { App, FileSystemAdapter, fuzzySearch, MarkdownSourceView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TFile } from 'obsidian';
+import { App, FileSystemAdapter, FuzzyMatch, fuzzySearch, FuzzySuggestModal, MarkdownSourceView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, PreparedQuery, prepareQuery, Setting, SuggestModal, TFile } from 'obsidian';
 import { Builder, Index } from 'lunr';
 
 interface Author {
@@ -6,16 +6,34 @@ interface Author {
 	family?: string
 }
 
-interface Entry {
+// Entry data available in JSON export
+interface EntryData {
 	id: string,
 	title?: string,
 	author?: Author[],
 	issued?: {"date-parts": [any[]]}
 }
-function getEntryYear(entry: Entry): string {
-	if (entry.issued && entry.issued["date-parts"] && entry.issued["date-parts"][0].length > 0)
-		return entry.issued["date-parts"][0][0];
-	return null;
+
+class Entry {
+
+	constructor(private data: EntryData) { }
+
+	get id() { return this.data.id; }
+	get title() { return this.data.title; }
+
+	get authorString(): string | null {
+		return this.data.author
+			? this.data.author.map(a => `${a.given} ${a.family}`).join(", ")
+			: null;
+	}
+
+	get year(): number | null {
+		if (this.data.issued && this.data.issued["date-parts"]
+			  && this.data.issued["date-parts"][0].length > 0)
+			return this.data.issued["date-parts"][0][0];
+		return null;
+	}
+
 }
 
 
@@ -27,7 +45,6 @@ class CitationsPluginSettings {
 export default class MyPlugin extends Plugin {
 	settings: CitationsPluginSettings
 	library: {[id: string]: Entry} = {};
-	index?: Index = null;
 
 	get editor(): CodeMirror.Editor {
 		let view = this.app.workspace.activeLeaf.view;
@@ -91,33 +108,11 @@ export default class MyPlugin extends Plugin {
 
 		let libraryArray = JSON.parse(value);
 		// Index by citekey
-		this.library = Object.fromEntries(libraryArray.map((entry: Entry) => [entry.id, entry]))
-		this.rebuildIndex()
+		this.library = Object.fromEntries(libraryArray.map((entryData: EntryData) => [entryData.id, new Entry(entryData)]));
 	}
 
 	onunload() {
 		console.log('unloading plugin');
-	}
-
-	rebuildIndex() {
-		let b = new Builder();
-
-		b.field("id");
-		b.field("title");
-		b.field("authors");
-		b.field("year");
-
-		Object.values(this.library).forEach((entry: Entry) => {
-			b.add({
-				id: entry.id,
-				title: entry.title,
-				authors: entry.author && entry.author.flatMap(a =>
-					[a.given, a.family, `${a.given} ${a.family}`]),
-				year: getEntryYear(entry)
-			})
-		})
-
-		this.index = b.build();
 	}
 
 	async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {
@@ -147,30 +142,30 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SearchModal extends SuggestModal<Index.Result> {
+class SearchModal extends FuzzySuggestModal<Entry> {
 	plugin: MyPlugin;
 	limit = 50;
 
-  getSuggestions(query: string): Index.Result[] {
-		if (query == "")
-			return [];
-    return this.plugin.index.search(query);
-  };
+	getItems(): Entry[] {
+		return Object.values(this.plugin.library);
+	}
 
-  renderSuggestion(result: Index.Result, el: HTMLElement): void {
+	getItemText(item: Entry): string {
+		return `${item.title} ${item.authorString} ${item.year}`
+	}
+
+	onChooseItem(item: Entry, evt: MouseEvent | KeyboardEvent): void {
+		this.plugin.openLiteratureNote(item.id, false);
+	}
+
+  renderSuggestion(match: FuzzyMatch<Entry>, el: HTMLElement): void {
 		el.empty();
-		let entry = this.plugin.library[result.ref];
-
-		let authorText = entry.author ? entry.author.map(a => `${a.given} ${a.family}`).join(", ") : "";
+		let entry = match.item;
 
 		let container = el.createEl("div", {cls: "zoteroResult"});
 		container.createEl("span", {cls: "zoteroTitle", text: entry.title});
 		container.createEl("span", {cls: "zoteroCitekey", text: entry.id});
-		container.createEl("span", {cls: "zoteroAuthors", text: authorText});
-  }
-
-  onChooseSuggestion(item: Index.Result, evt: MouseEvent | KeyboardEvent): void {
-    this.plugin.openLiteratureNote(item.ref, false);
+		container.createEl("span", {cls: "zoteroAuthors", text: entry.authorString});
   }
 
 	constructor(app: App, plugin: MyPlugin) {
@@ -198,15 +193,15 @@ class SearchModal extends SuggestModal<Index.Result> {
 }
 
 class OpenNoteModal extends SearchModal {
-	onChooseSuggestion(item: Index.Result, evt: MouseEvent | KeyboardEvent): void {
+	onChooseItem(item: Entry, evt: MouseEvent | KeyboardEvent): void {
 		let newPane = evt instanceof KeyboardEvent && (evt as KeyboardEvent).ctrlKey;
-		this.plugin.openLiteratureNote(item.ref, newPane)
+		this.plugin.openLiteratureNote(item.id, newPane)
 	}
 }
 
 class InsertCitationModal extends SearchModal {
-	onChooseSuggestion(item: Index.Result, evt: any): void {
-		this.plugin.insertLiteratureNoteLink(item.ref);
+	onChooseItem(item: Entry, evt: any): void {
+		this.plugin.insertLiteratureNoteLink(item.id);
 	}
 }
 
