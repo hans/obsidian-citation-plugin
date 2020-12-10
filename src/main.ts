@@ -1,4 +1,4 @@
-import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, Plugin, TFile } from 'obsidian';
+import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, normalizePath, Plugin, TFile } from 'obsidian';
 // @ts-ignore
 import { watch } from 'original-fs';
 import * as path from 'path';
@@ -144,7 +144,7 @@ export default class CitationPlugin extends Plugin {
 
 	async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {
 		let path = this.getPathForCitekey(citekey),
-				file = this.app.vault.getAbstractFileByPath(path);
+				file = this.app.vault.getAbstractFileByPath(normalizePath(path));
 
 		if (file == null) {
 			file = await this.app.vault.create(path, this.getInitialContentForCitekey(citekey));
