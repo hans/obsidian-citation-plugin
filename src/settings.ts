@@ -11,7 +11,12 @@ export class CitationsPluginSettings {
 
 	literatureNoteTitleTemplate: string = "@{{citekey}}";
 	literatureNoteFolder: string = "Reading notes";
-	literatureNoteContentTemplate: string = "";
+	literatureNoteContentTemplate: string = "---\n" +
+		"title: {{title}}\n" +
+		"authors: {{authorString}}\n" +
+		"year: {{year}}\n" +
+		"---\n\n";
+		
 }
 
 
