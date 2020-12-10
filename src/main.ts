@@ -65,7 +65,7 @@ export default class CitationPlugin extends Plugin {
 			id: "insert-citation",
 			name: "Insert citation",
 			hotkeys: [
-				{modifiers: ["Ctrl", "Shift"], key: "i"},
+				{modifiers: ["Ctrl", "Shift"], key: "e"},
 			],
 			callback: () => {
 				let modal = new InsertCitationModal(this.app, this);
