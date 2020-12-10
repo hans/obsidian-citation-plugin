@@ -1,6 +1,5 @@
 import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, Plugin, TFile } from 'obsidian';
-// import { watch } from 'fs';
-import { watch } from 'chokidar';
+import { watch } from 'fs';
 import * as path from 'path';
 import { InsertCitationModal, OpenNoteModal } from './modals';
 
@@ -52,15 +51,8 @@ export default class CitationPlugin extends Plugin {
 			this.loadLibrary();
 
 			// Set up a watcher to refresh whenever the export is updated
-			// watch(this.settings.citationExportPath, (evt: string, _) => {
-			// 	console.log("reload trigger", evt)
-			// 	this.loadLibrary();
-			// })
-			// let watcher = new FSWatcher();
-			// watcher.start(this.settings.citationExportPath, true, false, "utf-8");
-			console.log(watch);
-			watch(this.settings.citationExportPath).on("all", (evt: string, _) => {
-				console.log("reload trigger", evt)
+			watch(this.settings.citationExportPath, (curr, prev) => {
+				console.log("reload trigger", curr)
 				this.loadLibrary();
 			})
 		} else {
