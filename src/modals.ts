@@ -20,7 +20,8 @@ class SearchModal extends FuzzySuggestModal<Entry> {
 		super(app);
 		this.plugin = plugin;
 
-		this.inputEl.addEventListener("keyup", (ev) => this.onInputKeyup(ev))
+		this.inputEl.addEventListener("keydown", (ev) => this.onInputKeydown(ev));
+		this.inputEl.addEventListener("keyup", (ev) => this.onInputKeyup(ev));
 	}
 
 	getItems(): Entry[] {
@@ -47,9 +48,14 @@ class SearchModal extends FuzzySuggestModal<Entry> {
 		container.createEl("span", {cls: authorsCls, text: entry.authorString});
   }
 
+	onInputKeydown(ev: KeyboardEvent) {
+		if (ev.key == "Tab") {
+			ev.preventDefault();
+		}
+	}
+
 	onInputKeyup(ev: KeyboardEvent) {
-		console.log("keyup", ev, this);
-		if (ev.key == "Enter") {
+		if (ev.key == "Enter" || ev.key == "Tab") {
 			(this as unknown as FuzzySuggestModalExt<Entry>).chooser.useSelectedItem(ev);
 		}
 	}
@@ -63,13 +69,18 @@ export class OpenNoteModal extends SearchModal {
 			{command: "↑↓", purpose: "to navigate"},
 			{command: "↵", purpose: "to open literature note"},
 			{command: "ctrl ↵", purpose: "to open literature note in a new pane"},
+			{command: "tab", purpose: "open in Zotero"},
 			{command: "esc", purpose: "to dismiss"},
 		])
   }
 
 	onChooseItem(item: Entry, evt: MouseEvent | KeyboardEvent): void {
-		let newPane = evt instanceof KeyboardEvent && (evt as KeyboardEvent).ctrlKey;
-		this.plugin.openLiteratureNote(item.id, newPane)
+		if (evt instanceof MouseEvent || evt.key == "Enter") {
+			let newPane = evt instanceof KeyboardEvent && (evt as KeyboardEvent).ctrlKey;
+			this.plugin.openLiteratureNote(item.id, newPane)
+		} else if (evt.key == "Tab") {
+			open(item.zoteroSelectURI);
+		}
 	}
 }
 

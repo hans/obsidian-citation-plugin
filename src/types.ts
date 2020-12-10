@@ -32,4 +32,8 @@ export class Entry {
 		return null;
 	}
 
+	get zoteroSelectURI(): string {
+		return `zotero://select/items/@${this.id}`;
+	}
+
 }
