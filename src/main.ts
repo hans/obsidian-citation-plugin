@@ -62,9 +62,6 @@ export default class CitationPlugin extends Plugin {
 		} else {
 			// TODO show warning?
 		}
-
-
-
 		this.addCommand({
 			id: "open-literature-note",
 			name: "Open literature note",
@@ -170,4 +167,28 @@ export default class CitationPlugin extends Plugin {
 			this.editor.replaceRange(linkText, this.editor.getCursor());
 		})
 	}
+
+	async openEntryPDF(item: Entry) {
+		// Get attachment URL(s)
+		let attachments = await this.zoteroRPC("item.attachments", [item.id]);
+		console.log(attachments);
+	}
+
+	/**
+	 * Invoke a method supported by the Better BibTeX JSON RPC.
+	 */
+	async zoteroRPC(method: string, params: string[]): Promise<any> {
+		return ajaxPromise({
+			method: "POST",
+			url: "http://127.0.0.1:23119/better-bibtex/json-rpc",
+			data: {jsonrpc: "2.0", method: method, params: params},
+			headers: {"Accept": "application/json"},
+
+			success: (resp: any, req: XMLHttpRequest) => {
+				console.log(resp, req);
+			},
+			error: null, // TODO
+		})
+	}
+
 }
