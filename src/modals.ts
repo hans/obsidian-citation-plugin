@@ -2,9 +2,26 @@ import { App, FuzzyMatch, FuzzySuggestModal } from "obsidian";
 import CitationPlugin from "./main";
 import { Entry } from "./types";
 
+
+// Stub some methods we know are there..
+interface FuzzySuggestModalExt<T> extends FuzzySuggestModal<T> {
+	chooser: ChooserExt;
+}
+interface ChooserExt {
+	useSelectedItem(evt: MouseEvent | KeyboardEvent): void;
+}
+
+
 class SearchModal extends FuzzySuggestModal<Entry> {
 	plugin: CitationPlugin;
 	limit = 50;
+
+	constructor(app: App, plugin: CitationPlugin) {
+		super(app);
+		this.plugin = plugin;
+
+		this.inputEl.addEventListener("keyup", (ev) => this.onInputKeyup(ev))
+	}
 
 	getItems(): Entry[] {
 		return Object.values(this.plugin.library);
@@ -30,21 +47,12 @@ class SearchModal extends FuzzySuggestModal<Entry> {
 		container.createEl("span", {cls: authorsCls, text: entry.authorString});
   }
 
-	constructor(app: App, plugin: CitationPlugin) {
-		super(app);
-		this.plugin = plugin;
-
-		// this.inputEl.addEventListener("keyup", (ev) => this.onInputKeyup(ev))
+	onInputKeyup(ev: KeyboardEvent) {
+		console.log("keyup", ev, this);
+		if (ev.key == "Enter") {
+			(this as unknown as FuzzySuggestModalExt<Entry>).chooser.useSelectedItem(ev);
+		}
 	}
-
-	// TODO need to get currently selected note
-	// onInputKeyup(ev: KeyboardEvent) {
-	// 	if (ev.key == "Enter") {
-	// 		let newPane = ev.ctrlKey;
-	// 		// TODO get the currently selected note
-	// 		this.plugin.openLiteratureNote("ab", newPane)
-	// 	}
-	// }
 }
 
 export class OpenNoteModal extends SearchModal {
@@ -54,7 +62,7 @@ export class OpenNoteModal extends SearchModal {
     this.setInstructions([
 			{command: "↑↓", purpose: "to navigate"},
 			{command: "↵", purpose: "to open literature note"},
-			// {command: "ctrl ↵", purpose: "to open literature note in a new pane"},
+			{command: "ctrl ↵", purpose: "to open literature note in a new pane"},
 			{command: "esc", purpose: "to dismiss"},
 		])
   }
