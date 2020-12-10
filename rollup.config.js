@@ -10,11 +10,10 @@ export default {
     format: 'cjs',
     exports: 'default'
   },
-  external: ['obsidian', 'path', 'fs'],
+  external: ['obsidian', 'path', 'fs', 'original-fs'],
   plugins: [
     typescript(),
     nodeResolve({browser: true}),
-    commonjs(),
-    json(),
+    commonjs({ignore: ['original-fs']})
   ]
 };

@@ -1,5 +1,6 @@
 import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, Plugin, TFile } from 'obsidian';
-import { watch } from 'fs';
+// @ts-ignore
+import { watch } from 'original-fs';
 import * as path from 'path';
 import { InsertCitationModal, OpenNoteModal } from './modals';
 
@@ -51,8 +52,11 @@ export default class CitationPlugin extends Plugin {
 			this.loadLibrary();
 
 			// Set up a watcher to refresh whenever the export is updated
-			watch(this.settings.citationExportPath, (curr, prev) => {
-				console.log("reload trigger", curr)
+			//
+			// TODO this gets triggered a lot when the library is re-exported, with
+			// "evt" always "change". Fine to just wastefully respond every time,
+			// from what I can see
+			watch(this.settings.citationExportPath, (evt: string) => {
 				this.loadLibrary();
 			})
 		} else {
@@ -89,7 +93,7 @@ export default class CitationPlugin extends Plugin {
 	}
 
 	async loadLibrary() {
-		console.log("loadLibrary");
+		console.debug("Citation plugin: Reloading library");
 		if (this.settings.citationExportPath) {
 			FileSystemAdapter.readLocalFile(this.settings.citationExportPath).then(buffer => this.onLibraryUpdate(buffer))
 		} else {
