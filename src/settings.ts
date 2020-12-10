@@ -10,7 +10,7 @@ export class CitationsPluginSettings {
 	public citationExportPath: string;
 
 	literatureNoteTitleTemplate: string = "@{{citekey}}";
-	literatureNotePathTemplate: string = "Reading notes/{{noteTitle}}.md";
+	literatureNoteFolder: string = "Reading notes";
 	literatureNoteContentTemplate: string = "";
 }
 
@@ -65,9 +65,9 @@ export class CitationSettingTab extends PluginSettingTab {
 			.setDesc("Available placeholders: {{citekey}}, {{title}}, {{authorString}}, {{year}}")
 
 		new Setting(containerEl)
-			.setName("Literature note path template")
-			.addText(input => this.buildTextInput(input, "literatureNotePathTemplate"))
-			.setDesc("Available placeholders: {{noteTitle}}");
+			.setName("Literature note folder")
+			.addText(input => this.buildTextInput(input, "literatureNoteFolder"))
+			.setDesc("Save literature note files in this folder within your vault. If empty, notes will be stored in the root directory of the vault.");
 
 		new Setting(containerEl)
 			.setName("Literature note content template")

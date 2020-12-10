@@ -1,4 +1,5 @@
 import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, Plugin, TFile } from 'obsidian';
+import * as path from 'path';
 import { InsertCitationModal, OpenNoteModal } from './modals';
 
 import { CitationsPluginSettings, CitationSettingTab, IIndexable } from './settings';
@@ -27,7 +28,7 @@ export default class CitationPlugin extends Plugin {
 			return;
 
 		const toLoad = ["citationExportPath", "literatureNoteTitleTemplate",
-									  "literatureNotePathTemplate", "literatureNoteContentTemplate"]
+									  "literatureNoteFolder", "literatureNoteContentTemplate"]
 		toLoad.forEach(setting => {
 			if (setting in loadedSettings) {
 				(this.settings as IIndexable)[setting] = loadedSettings[setting];
@@ -110,7 +111,8 @@ export default class CitationPlugin extends Plugin {
 
 	getPathForCitekey(citekey: string): string {
 		let title = this.getTitleForCitekey(citekey);
-		return formatTemplate(this.settings.literatureNotePathTemplate, {noteTitle: title});
+		// TODO escape note title
+		return path.join(this.settings.literatureNoteFolder, `${title}.md`);
 	}
 
 	getInitialContentForCitekey(citekey: string): string {
