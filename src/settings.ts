@@ -1,4 +1,3 @@
-import * as Handlebars from "handlebars";
 import { AbstractTextComponent, App, PluginSettingTab, Setting } from "obsidian";
 import CitationPlugin from "./main";
 
@@ -10,21 +9,9 @@ export interface IIndexable {
 export class CitationsPluginSettings {
 	public citationExportPath: string;
 
-	_literatureNoteTitleTemplate: string = "@{{citekey}}";
-	_literatureNotePathTemplate: string = "Reading notes/{{noteTitle}}.md";
-	_literatureNoteContentTemplate: string = "{{zoteroSelectLink}}";
-
-  get literatureNoteTitleTemplate() {
-    return Handlebars.compile(this._literatureNoteTitleTemplate);
-  }
-
-  get literatureNotePathTemplate() {
-    return Handlebars.compile(this._literatureNotePathTemplate);
-  }
-
-  get literatureNoteContentTemplate() {
-    return Handlebars.compile(this._literatureNoteContentTemplate);
-  }
+	literatureNoteTitleTemplate: string = "@{{citekey}}";
+	literatureNotePathTemplate: string = "Reading notes/{{noteTitle}}.md";
+	literatureNoteContentTemplate: string = "";
 }
 
 
@@ -74,17 +61,17 @@ export class CitationSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Literature note title template")
-			.addText(input => this.buildTextInput(input, "_literatureNoteTitleTemplate"))
+			.addText(input => this.buildTextInput(input, "literatureNoteTitleTemplate"))
 			.setDesc("Available placeholders: {{citekey}}, {{title}}, {{authorString}}, {{year}}")
 
 		new Setting(containerEl)
 			.setName("Literature note path template")
-			.addText(input => this.buildTextInput(input, "_literatureNotePathTemplate"))
+			.addText(input => this.buildTextInput(input, "literatureNotePathTemplate"))
 			.setDesc("Available placeholders: {{noteTitle}}");
 
 		new Setting(containerEl)
 			.setName("Literature note content template")
-			.addTextArea(input => this.buildTextInput(input, "_literatureNoteContentTemplate"))
+			.addTextArea(input => this.buildTextInput(input, "literatureNoteContentTemplate"))
 			.setDesc("Available placeholders: {{citekey}}, {{title}}, {{authorString}}, {{year}}")
 	}
 }

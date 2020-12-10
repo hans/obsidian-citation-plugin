@@ -3,6 +3,7 @@ import { InsertCitationModal, OpenNoteModal } from './modals';
 
 import { CitationsPluginSettings, CitationSettingTab, IIndexable } from './settings';
 import { Entry, EntryData } from './types';
+import { formatTemplate } from './util';
 
 
 export default class CitationPlugin extends Plugin {
@@ -25,8 +26,8 @@ export default class CitationPlugin extends Plugin {
 		if (!loadedSettings)
 			return;
 
-		const toLoad = ["citationExportPath", "_literatureNoteTitleTemplate",
-									  "_literatureNotePathTemplate", "_literatureNoteContentTemplate"]
+		const toLoad = ["citationExportPath", "literatureNoteTitleTemplate",
+									  "literatureNotePathTemplate", "literatureNoteContentTemplate"]
 		toLoad.forEach(setting => {
 			if (setting in loadedSettings) {
 				(this.settings as IIndexable)[setting] = loadedSettings[setting];
@@ -99,28 +100,26 @@ export default class CitationPlugin extends Plugin {
 
 	getTitleForCitekey(citekey: string): string {
 		let entry = this.library[citekey];
-		return this.settings.literatureNoteTitleTemplate({
+		return formatTemplate(this.settings.literatureNoteTitleTemplate, {
 			citekey: citekey,
 			title: entry.title,
-			authors: entry.authors,
 			authorString: entry.authorString,
-			year: entry.year
+			year: entry.year.toString()
 		});
 	}
 
 	getPathForCitekey(citekey: string): string {
 		let title = this.getTitleForCitekey(citekey);
-		return this.settings.literatureNotePathTemplate({noteTitle: title});
+		return formatTemplate(this.settings.literatureNotePathTemplate, {noteTitle: title});
 	}
 
 	getInitialContentForCitekey(citekey: string): string {
 		let entry = this.library[citekey];
-		return this.settings.literatureNoteContentTemplate({
+		return formatTemplate(this.settings.literatureNoteContentTemplate, {
 			citekey: citekey,
 			title: entry.title,
-			authors: entry.authors,
 			authorString: entry.authorString,
-			year: entry.year
+			year: entry.year.toString()
 		});
 	}
 
