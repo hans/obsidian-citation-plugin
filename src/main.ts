@@ -1,4 +1,6 @@
 import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, Plugin, TFile } from 'obsidian';
+// import { watch } from 'fs';
+import { watch } from 'chokidar';
 import * as path from 'path';
 import { InsertCitationModal, OpenNoteModal } from './modals';
 
@@ -44,10 +46,28 @@ export default class CitationPlugin extends Plugin {
 		this.loadSettings().then(() => this.init());
 	}
 
-	init() {
-		this.loadLibrary();
+	async init() {
+		if (this.settings.citationExportPath) {
+			// Load library for the first time
+			this.loadLibrary();
 
-		// TODO subscribe to library updates
+			// Set up a watcher to refresh whenever the export is updated
+			// watch(this.settings.citationExportPath, (evt: string, _) => {
+			// 	console.log("reload trigger", evt)
+			// 	this.loadLibrary();
+			// })
+			// let watcher = new FSWatcher();
+			// watcher.start(this.settings.citationExportPath, true, false, "utf-8");
+			console.log(watch);
+			watch(this.settings.citationExportPath).on("all", (evt: string, _) => {
+				console.log("reload trigger", evt)
+				this.loadLibrary();
+			})
+		} else {
+			// TODO show warning?
+		}
+
+
 
 		this.addCommand({
 			id: "open-literature-note",
@@ -77,6 +97,7 @@ export default class CitationPlugin extends Plugin {
 	}
 
 	async loadLibrary() {
+		console.log("loadLibrary");
 		if (this.settings.citationExportPath) {
 			FileSystemAdapter.readLocalFile(this.settings.citationExportPath).then(buffer => this.onLibraryUpdate(buffer))
 		} else {
