@@ -1,5 +1,6 @@
 .zoteroTitle { font-size: 14px; display: block; }
 .zoteroAuthors { color: #555; font-size: 13px; }
+.zoteroAuthorsEmpty::after {font-style: italic; content: "Unknown authors"; }
 .zoteroCitekey {
   color: #555; font-size: 13px; font-family: monospace;
   display: inline-block; margin-right: 5px; padding-right: 5px;
