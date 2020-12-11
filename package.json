@@ -1,6 +1,6 @@
 {
   "name": "obsidian-citation-plugin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Automatically search and insert citations from a Zotero library",
   "main": "main.js",
   "scripts": {
