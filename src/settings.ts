@@ -16,7 +16,7 @@ export class CitationsPluginSettings {
 		"authors: {{authorString}}\n" +
 		"year: {{year}}\n" +
 		"---\n\n";
-		
+
 }
 
 
@@ -62,21 +62,29 @@ export class CitationSettingTab extends PluginSettingTab {
           "citationExportPath",
           (_) => this.plugin.loadLibrary()));
 
-		containerEl.createEl("h3", {text: "Literature note settings"});
-
-		new Setting(containerEl)
-			.setName("Literature note title template")
-			.addText(input => this.buildTextInput(input, "literatureNoteTitleTemplate"))
-			.setDesc("Available placeholders: {{citekey}}, {{title}}, {{authorString}}, {{year}}")
-
 		new Setting(containerEl)
 			.setName("Literature note folder")
 			.addText(input => this.buildTextInput(input, "literatureNoteFolder"))
 			.setDesc("Save literature note files in this folder within your vault. If empty, notes will be stored in the root directory of the vault.");
 
+		containerEl.createEl("h3", {text: "Literature note settings"});
+		containerEl.createEl("p", {text: "The following variables can be used in the title and content templates:"});
+
+		let templateVariableUl = containerEl.createEl("ul", {attr: {id: "citationTemplateVariables"}});
+		Object.entries(this.plugin.TEMPLATE_VARIABLES).forEach(variableData => {
+			let [key, description] = variableData,
+			    templateVariableItem = templateVariableUl.createEl("li"),
+					templateVariableItemKey = templateVariableItem.createEl("span", {cls: "text-monospace", text: "{{" + key + "}}"}),
+					templateVariableItemDescription = templateVariableItem.createEl("span", {text: description ? ` — ${description}` : ""});
+			console.log(variableData, key, description);
+		});
+
+		new Setting(containerEl)
+			.setName("Literature note title template")
+			.addText(input => this.buildTextInput(input, "literatureNoteTitleTemplate"));
+
 		new Setting(containerEl)
 			.setName("Literature note content template")
-			.addTextArea(input => this.buildTextInput(input, "literatureNoteContentTemplate"))
-			.setDesc("Available placeholders: {{citekey}}, {{title}}, {{authorString}}, {{year}}")
+			.addTextArea(input => this.buildTextInput(input, "literatureNoteContentTemplate"));
 	}
 }

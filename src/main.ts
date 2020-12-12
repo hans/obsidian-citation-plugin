@@ -116,14 +116,39 @@ export default class CitationPlugin extends Plugin {
 		console.log('unloading plugin');
 	}
 
-	getTitleForCitekey(citekey: string): string {
-		let entry = this.library[citekey];
-		return formatTemplate(this.settings.literatureNoteTitleTemplate, {
+	TEMPLATE_VARIABLES = {
+		citekey: "Unique citekey",
+		abstract: "",
+		authorString: "Comma-separated list of author names",
+		containerTitle: "Title of the container holding the reference (e.g. book title for a book chapter, or the journal title for a journal article)",
+		DOI: "",
+		page: "Page or page range",
+		title: "",
+		URL: "",
+		year: "Publication year",
+		zoteroSelectURI: "URI to open the reference in Zotero",
+	};
+	getTemplateVariablesForCitekey(citekey: string): Record<string, string> {
+		let entry: Entry = this.library[citekey];
+		return {
 			citekey: citekey,
-			title: entry.title,
+
+			abstract: entry.abstract,
 			authorString: entry.authorString,
-			year: entry.year.toString()
-		});
+			containerTitle: entry.containerTitle,
+			DOI: entry.DOI,
+			page: entry.page,
+			title: entry.title,
+			URL: entry.URL,
+			year: entry.year?.toString(),
+			zoteroSelectURI: entry.zoteroSelectURI
+		}
+	}
+
+	getTitleForCitekey(citekey: string): string {
+		return formatTemplate(
+			this.settings.literatureNoteTitleTemplate,
+			this.getTemplateVariablesForCitekey(citekey));
 	}
 
 	getPathForCitekey(citekey: string): string {
@@ -133,13 +158,9 @@ export default class CitationPlugin extends Plugin {
 	}
 
 	getInitialContentForCitekey(citekey: string): string {
-		let entry = this.library[citekey];
-		return formatTemplate(this.settings.literatureNoteContentTemplate, {
-			citekey: citekey,
-			title: entry.title,
-			authorString: entry.authorString,
-			year: entry.year.toString()
-		});
+		return formatTemplate(
+			this.settings.literatureNoteContentTemplate,
+			this.getTemplateVariablesForCitekey(citekey));
 	}
 
 	async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {

@@ -1,3 +1,6 @@
+ul#citationTemplateVariables .text-monospace { font-family: monospace; }
+
+
 .zoteroTitle { font-size: 14px; display: block; }
 .zoteroAuthors { color: #555; font-size: 13px; }
 .zoteroAuthorsEmpty::after {font-style: italic; content: "Unknown authors"; }
