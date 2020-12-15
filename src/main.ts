@@ -1,17 +1,21 @@
-import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, normalizePath, Plugin, TFile } from 'obsidian';
+import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, normalizePath, Notice, Plugin, TFile } from 'obsidian';
 // @ts-ignore
 import { watch } from 'original-fs';
 import * as path from 'path';
 import { InsertCitationModal, OpenNoteModal } from './modals';
+import { NoticeExt } from './obsidian-extensions';
 
 import { CitationsPluginSettings, CitationSettingTab, IIndexable } from './settings';
 import { Entry, EntryData } from './types';
-import { formatTemplate } from './util';
+import { formatTemplate, Notifier } from './util';
 
 
 export default class CitationPlugin extends Plugin {
 	settings: CitationsPluginSettings;
 	library: {[id: string]: Entry} = {};
+
+	loadErrorNotifier = new Notifier(
+		"Unable to load citations. Please update Citations plugin settings.");
 
 	get editor(): CodeMirror.Editor {
 		let view = this.app.workspace.activeLeaf.view;
@@ -56,14 +60,16 @@ export default class CitationPlugin extends Plugin {
 			// TODO this gets triggered a lot when the library is re-exported, with
 			// "evt" always "change". Fine to just wastefully respond every time,
 			// from what I can see
-			watch(this.settings.citationExportPath, (evt: string) => {
-				this.loadLibrary();
-			})
+			try {
+				watch(this.settings.citationExportPath, (evt: string) => {
+					this.loadLibrary();
+				})
+			} catch {
+				this.loadErrorNotifier.show();
+			}
 		} else {
 			// TODO show warning?
 		}
-
-
 
 		this.addCommand({
 			id: "open-literature-note",
@@ -95,7 +101,13 @@ export default class CitationPlugin extends Plugin {
 	async loadLibrary() {
 		console.debug("Citation plugin: Reloading library");
 		if (this.settings.citationExportPath) {
-			FileSystemAdapter.readLocalFile(this.settings.citationExportPath).then(buffer => this.onLibraryUpdate(buffer))
+			FileSystemAdapter.readLocalFile(this.settings.citationExportPath)
+				.then(buffer => {
+					// If there is a remaining error message, hide it
+					this.loadErrorNotifier.hide();
+
+					this.onLibraryUpdate(buffer);
+				}).catch(() => this.loadErrorNotifier.show());
 		} else {
 			console.warn("Citations plugin: citation export path is not set. Please update plugin settings.");
 		}
