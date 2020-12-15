@@ -35,7 +35,7 @@ export class CitationSettingTab extends PluginSettingTab {
 	open() {
 		super.open();
 		this.checkCitationExportPath(this.plugin.settings.citationExportPath)
-			.then(this.showCitationExportPathSuccess());
+			.then(() => this.showCitationExportPathSuccess());
 	}
 
 	addTextChangeCallback(component: AbstractTextComponent<any>, settingsKey: string,
