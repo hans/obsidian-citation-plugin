@@ -7,7 +7,7 @@ import { NoticeExt } from './obsidian-extensions';
 
 import { CitationsPluginSettings, CitationSettingTab, IIndexable } from './settings';
 import { Entry, EntryData } from './types';
-import { formatTemplate, Notifier } from './util';
+import { DISALLOWED_FILENAME_CHARACTERS_RE, formatTemplate, Notifier } from './util';
 
 
 export default class CitationPlugin extends Plugin {
@@ -158,9 +158,10 @@ export default class CitationPlugin extends Plugin {
 	}
 
 	getTitleForCitekey(citekey: string): string {
-		return formatTemplate(
+		const unsafeTitle = formatTemplate(
 			this.settings.literatureNoteTitleTemplate,
 			this.getTemplateVariablesForCitekey(citekey));
+		return unsafeTitle.replace(DISALLOWED_FILENAME_CHARACTERS_RE, "_");
 	}
 
 	getPathForCitekey(citekey: string): string {

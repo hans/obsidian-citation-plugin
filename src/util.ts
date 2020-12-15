@@ -1,6 +1,10 @@
 import { Notice } from "obsidian";
 import { NoticeExt } from "./obsidian-extensions";
 
+
+export const DISALLOWED_FILENAME_CHARACTERS_RE = /[*"\\/<>:|?]/;
+
+
 export function formatTemplate(template: string, environment: {[key: string]: string}): string {
   return template.replace(/{{([\w_]+)}}/g, function(match, key) {
     if (key in environment) {
