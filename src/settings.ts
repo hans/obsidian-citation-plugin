@@ -1,4 +1,4 @@
-import { AbstractTextComponent, App, PluginSettingTab, Setting } from "obsidian";
+import { AbstractTextComponent, App, FileSystemAdapter, PluginSettingTab, Setting } from "obsidian";
 import CitationPlugin from "./main";
 
 // Trick: allow string indexing onto object properties
@@ -24,9 +24,18 @@ export class CitationSettingTab extends PluginSettingTab {
 
 	private plugin: CitationPlugin;
 
+	citationPathErrorEl: HTMLElement;
+	citationPathSuccessEl: HTMLElement;
+
 	constructor(app: App, plugin: CitationPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+	}
+
+	open() {
+		super.open();
+		this.checkCitationExportPath(this.plugin.settings.citationExportPath)
+			.then(this.showCitationExportPathSuccess());
 	}
 
 	addTextChangeCallback(component: AbstractTextComponent<any>, settingsKey: string,
@@ -60,7 +69,17 @@ export class CitationSettingTab extends PluginSettingTab {
 				.addText(input => this.buildTextInput(
           input.setPlaceholder("/path/to/export.json"),
           "citationExportPath",
-          (_) => this.plugin.loadLibrary()));
+          (value) => {
+						this.checkCitationExportPath(value)
+							.then((success) => success && this.plugin.loadLibrary());
+					}));
+
+		this.citationPathErrorEl = containerEl.createEl(
+			"p", {cls: "zoteroSettingCitationPathError d-none",
+		        text: "The citation export file cannot be found. Please check the path above."});
+		this.citationPathSuccessEl = containerEl.createEl(
+			"p", {cls: "zoteroSettingCitationPathSuccess d-none",
+		        text: "Loaded library with {{n}} references."});
 
 		new Setting(containerEl)
 			.setName("Literature note folder")
@@ -87,4 +106,30 @@ export class CitationSettingTab extends PluginSettingTab {
 			.setName("Literature note content template")
 			.addTextArea(input => this.buildTextInput(input, "literatureNoteContentTemplate"));
 	}
+
+	/**
+	 * Returns true iff the path exists; displays error as a side-effect
+	 */
+	async checkCitationExportPath(path: string): Promise<boolean> {
+		try {
+			await FileSystemAdapter.readLocalFile(path);
+			this.citationPathErrorEl.addClass("d-none");
+		} catch (e) {
+			this.citationPathSuccessEl.addClass("d-none");
+			this.citationPathErrorEl.removeClass("d-none");
+			return false;
+		}
+
+		return true;
+	}
+
+	showCitationExportPathSuccess() {
+		if (!this.plugin.library)
+			return;
+
+		const numReferences = Object.keys(this.plugin.library).length;
+		this.citationPathSuccessEl.setText(`Loaded library with ${numReferences} references.`);
+		this.citationPathSuccessEl.removeClass("d-none");
+	}
+
 }

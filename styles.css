@@ -1,6 +1,5 @@
 ul#citationTemplateVariables .text-monospace { font-family: monospace; }
 
-
 .zoteroTitle { font-size: 14px; display: block; }
 .zoteroAuthors { color: #555; font-size: 13px; }
 .zoteroAuthorsEmpty::after {font-style: italic; content: "Unknown authors"; }
@@ -18,3 +17,14 @@ ul#citationTemplateVariables .text-monospace { font-family: monospace; }
   display: inline-block; margin-right: 5px; padding-right: 5px;
   border-right: 1px solid #aaa;
 }
+
+
+/** Settings dialog **/
+.d-none { display: none; }
+.zoteroSettingCitationPathError, .zoteroSettingCitationPathSuccess {
+  font-size: 14px;
+}
+.zoteroSettingCitationPathError { color: var(--text-error); }
+.zoteroSettingCitationPathError:hover { color: var(--text-error-hover); }
+.zoteroSettingCitationPathSuccess { color: var(--text-accent); }
+.zoteroSettingCitationPathSuccess:hover { color: var(--text-accent-hover); }
