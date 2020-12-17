@@ -2,11 +2,13 @@ import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, normalizePath
 // @ts-ignore
 import { watch } from 'original-fs';
 import * as path from 'path';
+import * as Cite from '@citation-js/plugin-bibtex/lib/index';
+
 import { InsertCitationModal, OpenNoteModal } from './modals';
 import { NoticeExt } from './obsidian-extensions';
 
 import { CitationsPluginSettings, CitationSettingTab, IIndexable } from './settings';
-import { Entry, EntryData } from './types';
+import { Entry, EntryBibLaTeXData, EntryData } from './types';
 import { DISALLOWED_FILENAME_CHARACTERS_RE, formatTemplate, Notifier } from './util';
 
 
@@ -100,6 +102,7 @@ export default class CitationPlugin extends Plugin {
 
 	async loadLibrary() {
 		console.debug("Citation plugin: Reloading library");
+
 		if (this.settings.citationExportPath) {
 			FileSystemAdapter.readLocalFile(this.settings.citationExportPath)
 				.then(buffer => {
@@ -119,9 +122,18 @@ export default class CitationPlugin extends Plugin {
 		var decoder = new TextDecoder("utf8");
 		const value = decoder.decode(dataView);
 
-		let libraryArray = JSON.parse(value);
-		// Index by citekey
-		this.library = Object.fromEntries(libraryArray.map((entryData: EntryData) => [entryData.id, new Entry(entryData)]));
+    if (this.settings.citationExportFormat == "csl-json") {
+		    let libraryArray = JSON.parse(value),
+            entries = new Cite(libraryArray, {generateGraph: false}).data as EntryData[];
+
+  		// Index by citekey
+  		this.library = Object.fromEntries(entries.map((entryData: EntryData) =>
+        [entryData.id, new Entry(entryData, "csl-json")]));
+    } else if (this.settings.citationExportFormat == "biblatex") {
+      let entries: EntryBibLaTeXData[] = Cite.parse.biblatex.text(value);
+      this.library = Object.fromEntries(entries.map((entryData) =>
+        [entryData.label, new Entry(entryData, "biblatex")]))
+    }
 	}
 
 	onunload() {
@@ -133,6 +145,7 @@ export default class CitationPlugin extends Plugin {
 		abstract: "",
 		authorString: "Comma-separated list of author names",
 		containerTitle: "Title of the container holding the reference (e.g. book title for a book chapter, or the journal title for a journal article)",
+    event: "Name of related event (e.g. conference name)",
 		DOI: "",
 		page: "Page or page range",
 		title: "",
