@@ -2,7 +2,7 @@ import { App, FileSystemAdapter, MarkdownSourceView, MarkdownView, normalizePath
 // @ts-ignore
 import { watch } from 'original-fs';
 import * as path from 'path';
-import { InsertCitationModal, OpenNoteModal } from './modals';
+import { InsertCitationModal, InsertZoteroDirectLinkModal, OpenNoteModal } from './modals';
 import { NoticeExt } from './obsidian-extensions';
 
 import { CitationsPluginSettings, CitationSettingTab, IIndexable } from './settings';
@@ -94,7 +94,19 @@ export default class CitationPlugin extends Plugin {
 				modal.open();
 			}
 		})
-
+		
+		this.addCommand({
+			id: "insert-zotero-link",
+			name: "Insert Zotero direct-link",
+			hotkeys: [
+				{modifiers: ["Ctrl", "Shift"], key: "z"},
+			],
+			callback: () => {
+				let modal = new InsertZoteroDirectLinkModal(this.app, this);
+				modal.open();
+			}
+		})
+		
 		this.addSettingTab(new CitationSettingTab(this.app, this));
 	}
 
@@ -203,5 +215,10 @@ export default class CitationPlugin extends Plugin {
 			// console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
 			this.editor.replaceRange(linkText, this.editor.getCursor());
 		})
+	}
+
+	async  insertZoteroDirectLink(citekey: string, zoteroLink: string) {
+		let zoteroLinkText = '[@' + citekey + '](' + zoteroLink + ')';
+		this.editor.replaceRange(zoteroLinkText, this.editor.getCursor());
 	}
 }

@@ -99,3 +99,19 @@ export class InsertCitationModal extends SearchModal {
 		this.plugin.insertLiteratureNoteLink(item.id);
 	}
 }
+
+export class InsertZoteroDirectLinkModal extends SearchModal {
+	constructor(app: App, plugin: CitationPlugin) {
+	  super(app, plugin);
+  
+	  this.setInstructions([
+			  {command: "↑↓", purpose: "to navigate"},
+			  {command: "↵", purpose: "to insert zotero direct-link"},
+			  {command: "esc", purpose: "to dismiss"},
+		  ])
+	}
+  	
+	  onChooseItem(item: Entry, evt: any): void {
+		this.plugin.insertZoteroDirectLink(item.id, item.zoteroSelectURI);
+	  }
+  }
