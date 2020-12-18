@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { AbstractTextComponent, App, FileSystemAdapter, PluginSettingTab, Setting } from "obsidian";
 import CitationPlugin from "./main";
 
@@ -66,12 +67,16 @@ export class CitationSettingTab extends PluginSettingTab {
     // NB: we force reload of the library on path change.
 		new Setting(containerEl)
 				.setName("Citation export path")
+        .setDesc("Path to citation library exported by your reference manager. " +
+                 "Can be an absolute path or a path relative to the current vault root folder. " +
+                 "Citations will be automatically reloaded whenever this file updates.")
 				.addText(input => this.buildTextInput(
           input.setPlaceholder("/path/to/export.json"),
           "citationExportPath",
           (value) => {
 						this.checkCitationExportPath(value)
-							.then((success) => success && this.plugin.loadLibrary());
+							.then((success) => success
+                && this.plugin.loadLibrary().then(() => this.showCitationExportPathSuccess()));
 					}));
 
 		this.citationPathErrorEl = containerEl.createEl(
@@ -110,9 +115,9 @@ export class CitationSettingTab extends PluginSettingTab {
 	/**
 	 * Returns true iff the path exists; displays error as a side-effect
 	 */
-	async checkCitationExportPath(path: string): Promise<boolean> {
+	async checkCitationExportPath(filePath: string): Promise<boolean> {
 		try {
-			await FileSystemAdapter.readLocalFile(path);
+			await FileSystemAdapter.readLocalFile(this.plugin.resolveLibraryPath(filePath));
 			this.citationPathErrorEl.addClass("d-none");
 		} catch (e) {
 			this.citationPathSuccessEl.addClass("d-none");

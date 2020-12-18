@@ -98,11 +98,22 @@ export default class CitationPlugin extends Plugin {
 		this.addSettingTab(new CitationSettingTab(this.app, this));
 	}
 
+  /**
+   * Resolve a provided library path, allowing for relative paths rooted at
+   * the vault directory.
+   */
+  resolveLibraryPath(rawPath: string): string {
+    const vaultRoot = this.app.vault.adapter instanceof FileSystemAdapter
+      ? this.app.vault.adapter.getBasePath()
+      : "/";
+    return path.resolve(vaultRoot, rawPath);
+  }
+
 	async loadLibrary() {
 		console.debug("Citation plugin: Reloading library");
 		if (this.settings.citationExportPath) {
-			FileSystemAdapter.readLocalFile(this.settings.citationExportPath)
-				.then(buffer => {
+      const filePath = this.resolveLibraryPath(this.settings.citationExportPath);
+			FileSystemAdapter.readLocalFile(filePath).then(buffer => {
 					// If there is a remaining error message, hide it
 					this.loadErrorNotifier.hide();
 
