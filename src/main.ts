@@ -32,14 +32,14 @@ export default class CitationPlugin extends Plugin {
   );
 
   get editor(): CodeMirror.Editor {
-    let view = this.app.workspace.activeLeaf.view;
+    const view = this.app.workspace.activeLeaf.view;
     if (!(view instanceof MarkdownView)) return null;
 
-    let sourceView = view.sourceMode;
+    const sourceView = view.sourceMode;
     return (sourceView as MarkdownSourceView).cmEditor;
   }
 
-  async loadSettings() {
+  async loadSettings(): Promise<void> {
     this.settings = new CitationsPluginSettings();
 
     const loadedSettings = await this.loadData();
@@ -58,15 +58,15 @@ export default class CitationPlugin extends Plugin {
     });
   }
 
-  async saveSettings() {
+  async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
   }
 
-  onload() {
+  onload(): void {
     this.loadSettings().then(() => this.init());
   }
 
-  async init() {
+  async init(): Promise<void> {
     if (this.settings.citationExportPath) {
       // Load library for the first time
       this.loadLibrary();
@@ -77,7 +77,7 @@ export default class CitationPlugin extends Plugin {
       // "evt" always "change". Fine to just wastefully respond every time,
       // from what I can see
       try {
-        watch(this.settings.citationExportPath, (evt: string) => {
+        watch(this.settings.citationExportPath, () => {
           this.loadLibrary();
         });
       } catch {
@@ -92,7 +92,7 @@ export default class CitationPlugin extends Plugin {
       name: 'Open literature note',
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'o' }],
       callback: () => {
-        let modal = new OpenNoteModal(this.app, this);
+        const modal = new OpenNoteModal(this.app, this);
         modal.open();
       },
     });
@@ -102,7 +102,7 @@ export default class CitationPlugin extends Plugin {
       name: 'Insert citation',
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'e' }],
       callback: () => {
-        let modal = new InsertCitationModal(this.app, this);
+        const modal = new InsertCitationModal(this.app, this);
         modal.open();
       },
     });
@@ -122,7 +122,7 @@ export default class CitationPlugin extends Plugin {
     return path.resolve(vaultRoot, rawPath);
   }
 
-  async loadLibrary() {
+  async loadLibrary(): Promise<void> {
     console.debug('Citation plugin: Reloading library');
     if (this.settings.citationExportPath) {
       const filePath = this.resolveLibraryPath(
@@ -143,13 +143,13 @@ export default class CitationPlugin extends Plugin {
     }
   }
 
-  onLibraryUpdate(libraryBuffer: ArrayBuffer) {
+  onLibraryUpdate(libraryBuffer: ArrayBuffer): void {
     // Decode file as UTF-8
-    var dataView = new DataView(libraryBuffer);
-    var decoder = new TextDecoder('utf8');
+    const dataView = new DataView(libraryBuffer);
+    const decoder = new TextDecoder('utf8');
     const value = decoder.decode(dataView);
 
-    let libraryArray = JSON.parse(value);
+    const libraryArray = JSON.parse(value);
     // Index by citekey
     this.library = Object.fromEntries(
       libraryArray.map((entryData: EntryData) => [
@@ -157,10 +157,6 @@ export default class CitationPlugin extends Plugin {
         new Entry(entryData),
       ]),
     );
-  }
-
-  onunload() {
-    console.log('unloading plugin');
   }
 
   TEMPLATE_VARIABLES = {
@@ -177,7 +173,7 @@ export default class CitationPlugin extends Plugin {
     zoteroSelectURI: 'URI to open the reference in Zotero',
   };
   getTemplateVariablesForCitekey(citekey: string): Record<string, string> {
-    let entry: Entry = this.library[citekey];
+    const entry: Entry = this.library[citekey];
     return {
       citekey: citekey,
 
@@ -202,7 +198,7 @@ export default class CitationPlugin extends Plugin {
   }
 
   getPathForCitekey(citekey: string): string {
-    let title = this.getTitleForCitekey(citekey);
+    const title = this.getTitleForCitekey(citekey);
     // TODO escape note title
     return path.join(this.settings.literatureNoteFolder, `${title}.md`);
   }
@@ -215,8 +211,8 @@ export default class CitationPlugin extends Plugin {
   }
 
   async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {
-    let path = this.getPathForCitekey(citekey),
-      file = this.app.vault.getAbstractFileByPath(normalizePath(path));
+    const path = this.getPathForCitekey(citekey);
+    let file = this.app.vault.getAbstractFileByPath(normalizePath(path));
 
     if (file == null) {
       file = await this.app.vault.create(
@@ -234,12 +230,12 @@ export default class CitationPlugin extends Plugin {
     });
   }
 
-  async insertLiteratureNoteLink(citekey: string) {
-    this.getOrCreateLiteratureNoteFile(citekey).then((file) => {
+  async insertLiteratureNoteLink(citekey: string): Promise<void> {
+    this.getOrCreateLiteratureNoteFile(citekey).then(() => {
       // TODO what is the API for this?
       console.log(this.app.workspace.activeLeaf);
 
-      let title = this.getTitleForCitekey(citekey),
+      const title = this.getTitleForCitekey(citekey),
         linkText = `[[${title}]]`;
       // console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
       this.editor.replaceRange(linkText, this.editor.getCursor());

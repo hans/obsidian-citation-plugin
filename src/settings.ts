@@ -1,4 +1,3 @@
-import * as path from 'path';
 import {
   AbstractTextComponent,
   App,
@@ -123,21 +122,21 @@ export class CitationSettingTab extends PluginSettingTab {
         'The following variables can be used in the title and content templates:',
     });
 
-    let templateVariableUl = containerEl.createEl('ul', {
+    const templateVariableUl = containerEl.createEl('ul', {
       attr: { id: 'citationTemplateVariables' },
     });
     Object.entries(this.plugin.TEMPLATE_VARIABLES).forEach((variableData) => {
-      let [key, description] = variableData,
-        templateVariableItem = templateVariableUl.createEl('li'),
-        templateVariableItemKey = templateVariableItem.createEl('span', {
-          cls: 'text-monospace',
-          text: '{{' + key + '}}',
-        }),
-        templateVariableItemDescription = templateVariableItem.createEl(
-          'span',
-          { text: description ? ` — ${description}` : '' },
-        );
-      console.log(variableData, key, description);
+      const [key, description] = variableData,
+        templateVariableItem = templateVariableUl.createEl('li');
+
+      templateVariableItem.createEl('span', {
+        cls: 'text-monospace',
+        text: '{{' + key + '}}',
+      });
+
+      templateVariableItem.createEl('span', {
+        text: description ? ` — ${description}` : '',
+      });
     });
 
     new Setting(containerEl)
@@ -171,7 +170,7 @@ export class CitationSettingTab extends PluginSettingTab {
     return true;
   }
 
-  showCitationExportPathSuccess() {
+  showCitationExportPathSuccess(): void {
     if (!this.plugin.library) return;
 
     const numReferences = Object.keys(this.plugin.library).length;
