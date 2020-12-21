@@ -17,9 +17,18 @@ class SearchModal extends FuzzySuggestModal<Entry> {
   constructor(app: App, plugin: CitationPlugin) {
     super(app);
     this.plugin = plugin;
+  }
 
-    this.inputEl.addEventListener('keydown', (ev) => this.onInputKeydown(ev));
-    this.inputEl.addEventListener('keyup', (ev) => this.onInputKeyup(ev));
+  onOpen() {
+    super.onOpen();
+
+    // Don't immediately register keyevent listeners. If the modal was triggered
+    // by an "Enter" keystroke (e.g. via the Obsidian command dialog), this event
+    // will be received here erroneously.
+    setTimeout(() => {
+      this.inputEl.addEventListener('keydown', (ev) => this.onInputKeydown(ev));
+      this.inputEl.addEventListener('keyup', (ev) => this.onInputKeyup(ev));
+    }, 50);
   }
 
   getItems(): Entry[] {
