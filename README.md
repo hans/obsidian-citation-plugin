@@ -14,7 +14,7 @@ Once the plugin is installed, you must provide it with a bibliography file:
 
 - If you use **Zotero** with [Better BibTeX][2]:
   - Select a collection in Zotero's left sidebar that you want to export.
-  - Click `File` -> `Export library &hellip;`. Select `Better CSL JSON` as the format. You can optionally choose "Keep updated" to automatically re-export the collection -- this is recommended!
+  - Click `File` -> `Export library ...`. Select `Better CSL JSON` as the format. You can optionally choose "Keep updated" to automatically re-export the collection -- this is recommended!
 - If you use other reference managers, check their documentation for CSL-JSON export support. We plan to officially support other managers in the future.
 
 Now open the Obsidian preferences and view the "Citations" tab. Paste the path to the JSON export in the text field labeled "Citation export path." After closing the settings dialog, you should now be able to search your references from Zotero!
@@ -24,7 +24,7 @@ Now open the Obsidian preferences and view the "Citations" tab. Paste the path t
 The plugin offers two simple features at the moment:
 
 1. **Open literature note** (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>): automatically create or open a literature note for a particular reference. The title, folder, and initial content of the note can be configured in the plugin settings.
-2.**Insert literature note reference** (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>): insert a link to the literature note corresponding to a particular reference.
+2. **Insert literature note reference** (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>): insert a link to the literature note corresponding to a particular reference.
 
 ## License
 
