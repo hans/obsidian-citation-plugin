@@ -113,3 +113,24 @@ export class InsertNoteLinkModal extends SearchModal {
     this.plugin.insertLiteratureNoteLink(item.id).catch(console.error);
   }
 }
+
+export class InsertCitationModal extends SearchModal {
+  constructor(app: App, plugin: CitationPlugin) {
+    super(app, plugin);
+
+    this.setInstructions([
+      { command: '↑↓', purpose: 'to navigate' },
+      { command: '↵', purpose: 'to insert Markdown citation' },
+      { command: 'shift ↵', purpose: 'to insert secondary Markdown citation' },
+      { command: 'esc', purpose: 'to dismiss' },
+    ]);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onChooseItem(item: Entry, evt: MouseEvent | KeyboardEvent): void {
+    const isAlternative = evt instanceof KeyboardEvent && evt.shiftKey;
+    this.plugin
+      .insertMarkdownCitation(item.id, isAlternative)
+      .catch(console.error);
+  }
+}

@@ -9,7 +9,11 @@ import {
 import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
-import { InsertNoteLinkModal, OpenNoteModal } from './modals';
+import {
+  InsertCitationModal,
+  InsertNoteLinkModal,
+  OpenNoteModal,
+} from './modals';
 
 import {
   CitationSettingTab,
@@ -103,6 +107,15 @@ export default class CitationPlugin extends Plugin {
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'e' }],
       callback: () => {
         const modal = new InsertNoteLinkModal(this.app, this);
+        modal.open();
+      },
+    });
+
+    this.addCommand({
+      id: 'insert-markdown-citation',
+      name: 'Insert Markdown citation',
+      callback: () => {
+        const modal = new InsertCitationModal(this.app, this);
         modal.open();
       },
     });
@@ -210,6 +223,20 @@ export default class CitationPlugin extends Plugin {
     );
   }
 
+  getMarkdownCitationForCitekey(citekey: string): string {
+    return formatTemplate(
+      this.settings.markdownCitationTemplate,
+      this.getTemplateVariablesForCitekey(citekey),
+    );
+  }
+
+  getAlternativeMarkdownCitationForCitekey(citekey: string): string {
+    return formatTemplate(
+      this.settings.alternativeMarkdownCitationTemplate,
+      this.getTemplateVariablesForCitekey(citekey),
+    );
+  }
+
   async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {
     const path = this.getPathForCitekey(citekey);
     let file = this.app.vault.getAbstractFileByPath(normalizePath(path));
@@ -240,5 +267,17 @@ export default class CitationPlugin extends Plugin {
       // console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
       this.editor.replaceRange(linkText, this.editor.getCursor());
     });
+  }
+
+  async insertMarkdownCitation(
+    citekey: string,
+    alternative = false,
+  ): Promise<void> {
+    const func = alternative
+      ? this.getAlternativeMarkdownCitationForCitekey
+      : this.getMarkdownCitationForCitekey;
+    const citation = func.bind(this)(citekey);
+
+    this.editor.replaceRange(citation, this.editor.getCursor());
   }
 }

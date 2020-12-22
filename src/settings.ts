@@ -24,6 +24,9 @@ export class CitationsPluginSettings {
     'authors: {{authorString}}\n' +
     'year: {{year}}\n' +
     '---\n\n';
+
+  markdownCitationTemplate = '[@{{citekey}}]';
+  alternativeMarkdownCitationTemplate = '@{{citekey}}';
 }
 
 export class CitationSettingTab extends PluginSettingTab {
@@ -149,6 +152,24 @@ export class CitationSettingTab extends PluginSettingTab {
       .setName('Literature note content template')
       .addTextArea((input) =>
         this.buildTextInput(input, 'literatureNoteContentTemplate'),
+      );
+
+    containerEl.createEl('h3', { text: 'Markdown citation settings' });
+    containerEl.createEl('p', {
+      text:
+        'You can insert Pandoc-style Markdown citations rather than literature notes by using the "Insert Markdown citation" command. The below options allow customization of the Markdown citation format.',
+    });
+
+    new Setting(containerEl)
+      .setName('Markdown primary citation template')
+      .addText((input) =>
+        this.buildTextInput(input, 'markdownCitationTemplate'),
+      );
+
+    new Setting(containerEl)
+      .setName('Markdown secondary citation template')
+      .addText((input) =>
+        this.buildTextInput(input, 'alternativeMarkdownCitationTemplate'),
       );
   }
 
