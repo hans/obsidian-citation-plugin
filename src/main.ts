@@ -9,7 +9,7 @@ import {
 import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
-import { InsertCitationModal, OpenNoteModal } from './modals';
+import { InsertNoteLinkModal, OpenNoteModal } from './modals';
 
 import {
   CitationSettingTab,
@@ -99,10 +99,10 @@ export default class CitationPlugin extends Plugin {
 
     this.addCommand({
       id: 'insert-citation',
-      name: 'Insert citation',
+      name: 'Insert literature note link',
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'e' }],
       callback: () => {
-        const modal = new InsertCitationModal(this.app, this);
+        const modal = new InsertNoteLinkModal(this.app, this);
         modal.open();
       },
     });

@@ -97,7 +97,7 @@ export class OpenNoteModal extends SearchModal {
   }
 }
 
-export class InsertCitationModal extends SearchModal {
+export class InsertNoteLinkModal extends SearchModal {
   constructor(app: App, plugin: CitationPlugin) {
     super(app, plugin);
 
