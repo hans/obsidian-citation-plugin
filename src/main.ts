@@ -34,6 +34,9 @@ export default class CitationPlugin extends Plugin {
   loadErrorNotifier = new Notifier(
     'Unable to load citations. Please update Citations plugin settings.',
   );
+  literatureNoteErrorNotifier = new Notifier(
+    'Unable to access literature note. Please check that the literature note folder exists, or update the Citations plugin settings.',
+  );
 
   get editor(): CodeMirror.Editor {
     const view = this.app.workspace.activeLeaf.view;
@@ -242,31 +245,40 @@ export default class CitationPlugin extends Plugin {
     let file = this.app.vault.getAbstractFileByPath(normalizePath(path));
 
     if (file == null) {
-      file = await this.app.vault.create(
-        path,
-        this.getInitialContentForCitekey(citekey),
-      );
+      try {
+        file = await this.app.vault.create(
+          path,
+          this.getInitialContentForCitekey(citekey),
+        );
+      } catch (exc) {
+        this.literatureNoteErrorNotifier.show();
+        throw exc;
+      }
     }
 
     return file as TFile;
   }
 
   async openLiteratureNote(citekey: string, newPane: boolean): Promise<void> {
-    this.getOrCreateLiteratureNoteFile(citekey).then((file: TFile) => {
-      this.app.workspace.getLeaf(newPane).openFile(file);
-    });
+    this.getOrCreateLiteratureNoteFile(citekey)
+      .then((file: TFile) => {
+        this.app.workspace.getLeaf(newPane).openFile(file);
+      })
+      .catch(console.error);
   }
 
   async insertLiteratureNoteLink(citekey: string): Promise<void> {
-    this.getOrCreateLiteratureNoteFile(citekey).then(() => {
-      // TODO what is the API for this?
-      console.log(this.app.workspace.activeLeaf);
+    this.getOrCreateLiteratureNoteFile(citekey)
+      .then(() => {
+        // TODO what is the API for this?
+        console.log(this.app.workspace.activeLeaf);
 
-      const title = this.getTitleForCitekey(citekey),
-        linkText = `[[${title}]]`;
-      // console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
-      this.editor.replaceRange(linkText, this.editor.getCursor());
-    });
+        const title = this.getTitleForCitekey(citekey),
+          linkText = `[[${title}]]`;
+        // console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
+        this.editor.replaceRange(linkText, this.editor.getCursor());
+      })
+      .catch(console.error);
   }
 
   async insertMarkdownCitation(
