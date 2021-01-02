@@ -19,7 +19,7 @@ import {
   CitationSettingTab,
   CitationsPluginSettings,
 } from './settings';
-import { Entry, EntryDataCSL, EntryCSLAdapter, IIndexable } from './types';
+import { Entry, EntryBibLaTeXAdapter, EntryCSLAdapter, IIndexable } from './types';
 import {
   DISALLOWED_FILENAME_CHARACTERS_RE,
   formatTemplate,
@@ -166,12 +166,26 @@ export default class CitationPlugin extends Plugin {
     const decoder = new TextDecoder('utf8');
     const value = decoder.decode(dataView);
 
-    const libraryArray = JSON.parse(value);
+    let libraryArray: object[];
+    let adapter: new (data: object) => Entry;
+
+    switch (this.settings.citationExportFormat) {
+      case "csl-json":
+      libraryArray = JSON.parse(value);
+      adapter = EntryCSLAdapter;
+      break;
+
+      case "biblatex":
+      libraryArray = []; // TODO
+      adapter = EntryBibLaTeXAdapter;
+      break;
+    }
+
     // Index by citekey
     this.library = Object.fromEntries(
-      libraryArray.map((entryData: EntryDataCSL) => [
+      libraryArray.map((entryData: any) => [
         entryData.id,
-        new EntryCSLAdapter(entryData),
+        new adapter(entryData),
       ]),
     );
   }
