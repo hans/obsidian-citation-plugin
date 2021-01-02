@@ -9,17 +9,21 @@ import {
 import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
+import * as BibTeXParser from '@retorquere/bibtex-parser';
+
 import {
   InsertCitationModal,
   InsertNoteLinkModal,
   OpenNoteModal,
 } from './modals';
 
+import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import {
-  CitationSettingTab,
-  CitationsPluginSettings,
-} from './settings';
-import { Entry, EntryBibLaTeXAdapter, EntryCSLAdapter, IIndexable } from './types';
+  Entry,
+  EntryBibLaTeXAdapter,
+  EntryCSLAdapter,
+  IIndexable,
+} from './types';
 import {
   DISALLOWED_FILENAME_CHARACTERS_RE,
   formatTemplate,
@@ -152,7 +156,10 @@ export default class CitationPlugin extends Plugin {
 
           this.onLibraryUpdate(buffer);
         })
-        .catch(() => this.loadErrorNotifier.show());
+        .catch((e) => {
+          console.error(e);
+          this.loadErrorNotifier.show()
+        });
     } else {
       console.warn(
         'Citations plugin: citation export path is not set. Please update plugin settings.',
@@ -160,7 +167,7 @@ export default class CitationPlugin extends Plugin {
     }
   }
 
-  onLibraryUpdate(libraryBuffer: ArrayBuffer): void {
+  async onLibraryUpdate(libraryBuffer: ArrayBuffer): Promise<void> {
     // Decode file as UTF-8
     const dataView = new DataView(libraryBuffer);
     const decoder = new TextDecoder('utf8');
@@ -170,21 +177,25 @@ export default class CitationPlugin extends Plugin {
     let adapter: new (data: object) => Entry;
 
     switch (this.settings.citationExportFormat) {
-      case "csl-json":
-      libraryArray = JSON.parse(value);
-      adapter = EntryCSLAdapter;
-      break;
+      case 'csl-json':
+        libraryArray = JSON.parse(value);
+        adapter = EntryCSLAdapter;
+        break;
 
-      case "biblatex":
-      libraryArray = []; // TODO
-      adapter = EntryBibLaTeXAdapter;
-      break;
+      case 'biblatex':
+        let ret = BibTeXParser.parse(value) as BibTeXParser.Bibliography;
+        console.log(ret.errors);
+        libraryArray = (<BibTeXParser.Bibliography>ret)
+          .entries;
+        adapter = EntryBibLaTeXAdapter;
+        break;
     }
+    console.log(libraryArray.length);
 
     // Index by citekey
     this.library = Object.fromEntries(
       libraryArray.map((entryData: any) => [
-        entryData.id,
+        entryData.id || entryData.key,
         new adapter(entryData),
       ]),
     );

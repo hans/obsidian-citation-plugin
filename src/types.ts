@@ -1,3 +1,5 @@
+import { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
+
 // Trick: allow string indexing onto object properties
 export interface IIndexable {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,27 +108,6 @@ export class EntryCSLAdapter extends Entry {
   get URL() {
     return this.data.URL;
   }
-
-}
-
-export interface EntryDataBibLaTeX {
-  label: string;
-  type: string;
-
-  properties: {
-    abstract?: string;
-    author?: string;
-    booktitle?: string;
-    date?: string;
-    doi?: string;
-    eventtitle?: string;
-    journaltitle?: string;
-    pages?: string;
-    shortjournal?: string;
-    title?: string;
-    shorttitle?: string;
-    url?: string;
-  };
 }
 
 const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
@@ -144,11 +125,23 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   url: 'URL',
 };
 
+// BibLaTeX parser returns arrays of property values (allowing for repeated
+// property entries). For the following fields, just blindly take the first.
+const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
+  'abstract',
+  'booktitle',
+  'date',
+  'doi',
+  'eventtitle',
+  'journaltitle',
+  'pages',
+  'shortjournal',
+  'title',
+  'shorttitle',
+  'url',
+];
+
 export class EntryBibLaTeXAdapter extends Entry {
-
-  // Unsupported properties
-  author: Author[] = null;
-
   abstract?: string;
   authorString?: string;
   containerTitle?: string;
@@ -167,18 +160,33 @@ export class EntryBibLaTeXAdapter extends Entry {
     Object.entries(BIBLATEX_PROPERTY_MAPPING).forEach(
       (map: [string, string]) => {
         const [src, tgt] = map;
-        if (src in this.data.properties) {
-          (this as IIndexable)[tgt] = (this.data.properties as IIndexable)[src];
+        if (src in this.data.fields) {
+          let val = this.data.fields[src];
+          if (src in BIBLATEX_PROPERTY_TAKE_FIRST) {
+            val = (val as any[])[0];
+          }
+
+          (this as IIndexable)[tgt] = val;
         }
       },
     );
   }
 
-  get id() { return this.data.label; }
-  get type() { return this.data.type; }
+  get id() {
+    return this.data.key;
+  }
+  get type() {
+    return this.data.type;
+  }
 
   get issuedDate() {
     return this.issued ? new Date(this.issued) : null;
   }
 
+  get author(): Author[] {
+    return this.data.creators.author?.map((a) => ({
+      given: a.firstName,
+      family: a.lastName,
+    }));
+  }
 }
