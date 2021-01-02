@@ -18,9 +18,8 @@ import {
 import {
   CitationSettingTab,
   CitationsPluginSettings,
-  IIndexable,
 } from './settings';
-import { Entry, EntryData } from './types';
+import { Entry, EntryDataCSL, EntryCSLAdapter, IIndexable } from './types';
 import {
   DISALLOWED_FILENAME_CHARACTERS_RE,
   formatTemplate,
@@ -170,9 +169,9 @@ export default class CitationPlugin extends Plugin {
     const libraryArray = JSON.parse(value);
     // Index by citekey
     this.library = Object.fromEntries(
-      libraryArray.map((entryData: EntryData) => [
+      libraryArray.map((entryData: EntryDataCSL) => [
         entryData.id,
-        new Entry(entryData),
+        new EntryCSLAdapter(entryData),
       ]),
     );
   }

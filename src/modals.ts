@@ -52,7 +52,7 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     container.createEl('span', { cls: 'zoteroTitle', text: entry.title });
     container.createEl('span', { cls: 'zoteroCitekey', text: entry.id });
 
-    const authorsCls = entry.authors
+    const authorsCls = entry.author || entry.authorString
       ? 'zoteroAuthors'
       : 'zoteroAuthors zoteroAuthorsEmpty';
     container.createEl('span', { cls: authorsCls, text: entry.authorString });

@@ -6,12 +6,7 @@ import {
   Setting,
 } from 'obsidian';
 import CitationPlugin from './main';
-
-// Trick: allow string indexing onto object properties
-export interface IIndexable {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
+import { IIndexable } from './types';
 
 export class CitationsPluginSettings {
   public citationExportPath: string;
