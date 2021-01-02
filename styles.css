@@ -28,3 +28,9 @@ ul#citationTemplateVariables .text-monospace { font-family: monospace; }
 .zoteroSettingCitationPathError:hover { color: var(--text-error-hover); }
 .zoteroSettingCitationPathSuccess { color: var(--text-accent); }
 .zoteroSettingCitationPathSuccess:hover { color: var(--text-accent-hover); }
+
+#zoteroSettingTab textarea {
+  resize: vertical;
+  width: 100%;
+  min-height: 10em;
+}

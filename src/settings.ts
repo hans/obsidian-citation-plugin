@@ -75,6 +75,7 @@ export class CitationSettingTab extends PluginSettingTab {
     const { containerEl } = this;
 
     containerEl.empty();
+    containerEl.setAttr('id', 'zoteroSettingTab');
 
     containerEl.createEl('h2', { text: 'Citation plugin settings' });
 
