@@ -23,6 +23,7 @@ import {
   EntryBibLaTeXAdapter,
   EntryCSLAdapter,
   IIndexable,
+  Library,
 } from './types';
 import {
   DISALLOWED_FILENAME_CHARACTERS_RE,
@@ -32,7 +33,7 @@ import {
 
 export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
-  library: { [id: string]: Entry } = {};
+  library: Library = {};
 
   loadErrorNotifier = new Notifier(
     'Unable to load citations. Please update Citations plugin settings.',

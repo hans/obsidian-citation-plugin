@@ -9,6 +9,8 @@ export interface IIndexable {
 const databaseTypes = ['csl-json', 'biblatex'] as const;
 export type DatabaseType = typeof databaseTypes[number];
 
+export type Library = { [citekey: string]: Entry };
+
 export interface Author {
   given?: string;
   family?: string;
