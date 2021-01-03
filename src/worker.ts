@@ -28,7 +28,7 @@ registerPromiseWorker(
       ) as BibTeXParser.Bibliography;
       libraryArray = parsed.entries;
       adapter = EntryBibLaTeXAdapter;
-      idKey = 'label';
+      idKey = 'key';
     }
 
     return Object.fromEntries(

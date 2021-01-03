@@ -34,6 +34,7 @@ export class CitationsPluginSettings {
 export class CitationSettingTab extends PluginSettingTab {
   private plugin: CitationPlugin;
 
+  citationPathLoadingEl: HTMLElement;
   citationPathErrorEl: HTMLElement;
   citationPathSuccessEl: HTMLElement;
 
@@ -55,6 +56,7 @@ export class CitationSettingTab extends PluginSettingTab {
     cb?: (value: string) => void,
   ): void {
     component.onChange(async (value) => {
+      console.log(settingsKey, value);
       (this.plugin.settings as IIndexable)[settingsKey] = value;
       this.plugin.saveSettings().then(() => {
         if (cb) {
@@ -88,9 +90,20 @@ export class CitationSettingTab extends PluginSettingTab {
           component.addOptions(CITATION_DATABASE_FORMAT_LABELS),
           'citationExportFormat',
           (value) => {
+            console.log('change');
             this.checkCitationExportPath(
               this.plugin.settings.citationExportPath,
-            ).then((success) => success && this.plugin.loadLibrary());
+            ).then((success) => {
+              if (success) {
+                this.citationPathSuccessEl.addClass('d-none');
+                this.citationPathLoadingEl.removeClass('d-none');
+
+                this.plugin.loadLibrary().then(() => {
+                  this.citationPathLoadingEl.addClass('d-none');
+                  this.showCitationExportPathSuccess();
+                });
+              }
+            });
           },
         ),
       );
@@ -119,6 +132,10 @@ export class CitationSettingTab extends PluginSettingTab {
         ),
       );
 
+    this.citationPathLoadingEl = containerEl.createEl('p', {
+      cls: 'zoteroSettingCitationPathLoading d-none',
+      text: 'Loading citation database...',
+    });
     this.citationPathErrorEl = containerEl.createEl('p', {
       cls: 'zoteroSettingCitationPathError d-none',
       text:
@@ -194,6 +211,8 @@ export class CitationSettingTab extends PluginSettingTab {
    * Returns true iff the path exists; displays error as a side-effect
    */
   async checkCitationExportPath(filePath: string): Promise<boolean> {
+    this.citationPathLoadingEl.addClass('d-none');
+
     try {
       await FileSystemAdapter.readLocalFile(
         this.plugin.resolveLibraryPath(filePath),
