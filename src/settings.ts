@@ -56,7 +56,6 @@ export class CitationSettingTab extends PluginSettingTab {
     cb?: (value: string) => void,
   ): void {
     component.onChange(async (value) => {
-      console.log(settingsKey, value);
       (this.plugin.settings as IIndexable)[settingsKey] = value;
       this.plugin.saveSettings().then(() => {
         if (cb) {
@@ -90,7 +89,6 @@ export class CitationSettingTab extends PluginSettingTab {
           component.addOptions(CITATION_DATABASE_FORMAT_LABELS),
           'citationExportFormat',
           (value) => {
-            console.log('change');
             this.checkCitationExportPath(
               this.plugin.settings.citationExportPath,
             ).then((success) => {
