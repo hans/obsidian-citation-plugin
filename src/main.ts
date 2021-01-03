@@ -57,6 +57,8 @@ export default class CitationPlugin extends Plugin {
       'literatureNoteTitleTemplate',
       'literatureNoteFolder',
       'literatureNoteContentTemplate',
+      'markdownCitationTemplate',
+      'alternativeMarkdownCitationTemplate',
     ];
     toLoad.forEach((setting) => {
       if (setting in loadedSettings) {
