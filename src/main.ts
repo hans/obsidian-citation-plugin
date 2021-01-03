@@ -63,6 +63,7 @@ export default class CitationPlugin extends Plugin {
 
     const toLoad = [
       'citationExportPath',
+      'citationExportFormat',
       'literatureNoteTitleTemplate',
       'literatureNoteFolder',
       'literatureNoteContentTemplate',
