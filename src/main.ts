@@ -20,6 +20,7 @@ import {
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import {
   Entry,
+  EntryData,
   EntryBibLaTeXAdapter,
   EntryCSLAdapter,
   IIndexable,
@@ -169,8 +170,24 @@ export default class CitationPlugin extends Plugin {
             databaseType: this.settings.citationExportFormat,
           });
         })
-        .then((library) => {
-          this.library = library;
+        .then((entries: EntryData[]) => {
+          let adapter: new (data: EntryData) => Entry;
+          let idKey: string;
+
+          switch (this.settings.citationExportFormat) {
+            case 'biblatex':
+              adapter = EntryBibLaTeXAdapter;
+              idKey = 'key';
+              break;
+            case 'csl-json':
+              adapter = EntryCSLAdapter;
+              idKey = 'id';
+              break;
+          }
+
+          this.library = Object.fromEntries(
+            entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
+          );
         })
         .catch((e) => {
           console.error(e);
