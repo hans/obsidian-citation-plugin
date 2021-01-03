@@ -119,7 +119,6 @@ export class EntryCSLAdapter extends Entry {
 
 const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   abstract: 'abstract',
-  author: 'authorString',
   booktitle: 'containerTitle',
   date: 'issued',
   doi: 'DOI',
@@ -150,7 +149,6 @@ const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
 
 export class EntryBibLaTeXAdapter extends Entry {
   abstract?: string;
-  authorString?: string;
   containerTitle?: string;
   containerTitleShort?: string;
   DOI?: string;
@@ -184,6 +182,20 @@ export class EntryBibLaTeXAdapter extends Entry {
   }
   get type() {
     return this.data.type;
+  }
+
+  get authorString() {
+    if (this.data.creators.author) {
+      const names = this.data.creators.author.map((name) => {
+        if (name.literal) return name.literal;
+        const parts = [name.firstName, name.prefix, name.lastName, name.suffix];
+        // Drop any null parts and join
+        return parts.filter((x) => x).join(' ');
+      });
+      return names.join(', ');
+    } else {
+      return this.data.fields.author?.join(', ');
+    }
   }
 
   get issuedDate() {
