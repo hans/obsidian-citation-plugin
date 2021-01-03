@@ -144,14 +144,15 @@ export default class CitationPlugin extends Plugin {
       const filePath = this.resolveLibraryPath(
         this.settings.citationExportPath,
       );
-      FileSystemAdapter.readLocalFile(filePath)
+      return FileSystemAdapter.readLocalFile(filePath)
         .then((buffer) => {
           // If there is a remaining error message, hide it
           this.loadErrorNotifier.hide();
 
           this.onLibraryUpdate(buffer);
         })
-        .catch(() => this.loadErrorNotifier.show());
+        .catch(() => this.loadErrorNotifier.show())
+        .then();
     } else {
       console.warn(
         'Citations plugin: citation export path is not set. Please update plugin settings.',
