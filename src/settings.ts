@@ -7,16 +7,16 @@ import {
   Setting,
 } from 'obsidian';
 import CitationPlugin from './main';
-import { IIndexable } from './types';
+import { IIndexable, DatabaseType } from './types';
 
-const CITATION_DATABASE_FORMAT_LABELS = {
+const CITATION_DATABASE_FORMAT_LABELS: Record<DatabaseType, string> = {
   'csl-json': 'CSL-JSON',
   biblatex: 'BibLaTeX',
 };
 
 export class CitationsPluginSettings {
   public citationExportPath: string;
-  citationExportFormat: 'csl-json' | 'biblatex' = 'csl-json';
+  citationExportFormat: DatabaseType = 'csl-json';
 
   literatureNoteTitleTemplate = '@{{citekey}}';
   literatureNoteFolder = 'Reading notes';
