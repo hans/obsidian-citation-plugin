@@ -40,6 +40,8 @@ export abstract class Entry {
   }
 }
 
+export type EntryData = EntryDataCSL | EntryDataBibLaTeX;
+
 export interface EntryDataCSL {
   id: string;
   type: string;

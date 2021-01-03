@@ -2,6 +2,7 @@ import typescript from '@rollup/plugin-typescript';
 import {nodeResolve} from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
+import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 
 export default {
   input: 'src/main.ts',
@@ -16,6 +17,7 @@ export default {
     typescript(),
     nodeResolve({browser: true}),
     commonjs({ignore: ['original-fs']}),
-    json()
+    json(),
+    webWorkerLoader({extensions: [".ts"]}),
   ]
 };

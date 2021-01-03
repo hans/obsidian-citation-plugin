@@ -9,7 +9,7 @@ import {
 import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
-import * as BibTeXParser from '@retorquere/bibtex-parser';
+import PromiseWorker from 'promise-worker';
 
 import {
   InsertCitationModal,
@@ -30,10 +30,14 @@ import {
   formatTemplate,
   Notifier,
 } from './util';
+import LoadWorker from 'web-worker:./worker';
 
 export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
   library: Library = {};
+
+  private _loadWorker = new LoadWorker();
+  private loadWorker: PromiseWorker = new PromiseWorker(this._loadWorker);
 
   loadErrorNotifier = new Notifier(
     'Unable to load citations. Please update Citations plugin settings.',
@@ -155,51 +159,28 @@ export default class CitationPlugin extends Plugin {
           // If there is a remaining error message, hide it
           this.loadErrorNotifier.hide();
 
-          this.onLibraryUpdate(buffer);
+          // Decode file as UTF-8.
+          const dataView = new DataView(buffer);
+          const decoder = new TextDecoder('utf8');
+          const value = decoder.decode(dataView);
+
+          return this.loadWorker.postMessage({
+            databaseRaw: value,
+            databaseType: this.settings.citationExportFormat,
+          });
+        })
+        .then((library) => {
+          this.library = library;
         })
         .catch((e) => {
           console.error(e);
-          this.loadErrorNotifier.show()
+          this.loadErrorNotifier.show();
         });
     } else {
       console.warn(
         'Citations plugin: citation export path is not set. Please update plugin settings.',
       );
     }
-  }
-
-  async onLibraryUpdate(libraryBuffer: ArrayBuffer): Promise<void> {
-    // Decode file as UTF-8
-    const dataView = new DataView(libraryBuffer);
-    const decoder = new TextDecoder('utf8');
-    const value = decoder.decode(dataView);
-
-    let libraryArray: object[];
-    let adapter: new (data: object) => Entry;
-
-    switch (this.settings.citationExportFormat) {
-      case 'csl-json':
-        libraryArray = JSON.parse(value);
-        adapter = EntryCSLAdapter;
-        break;
-
-      case 'biblatex':
-        let ret = BibTeXParser.parse(value) as BibTeXParser.Bibliography;
-        console.log(ret.errors);
-        libraryArray = (<BibTeXParser.Bibliography>ret)
-          .entries;
-        adapter = EntryBibLaTeXAdapter;
-        break;
-    }
-    console.log(libraryArray.length);
-
-    // Index by citekey
-    this.library = Object.fromEntries(
-      libraryArray.map((entryData: any) => [
-        entryData.id || entryData.key,
-        new adapter(entryData),
-      ]),
-    );
   }
 
   TEMPLATE_VARIABLES = {
