@@ -30,6 +30,7 @@ import {
   DISALLOWED_FILENAME_CHARACTERS_RE,
   formatTemplate,
   Notifier,
+  WorkerManager,
 } from './util';
 import LoadWorker from 'web-worker:./worker';
 
@@ -37,8 +38,9 @@ export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
   library: Library = {};
 
-  private _loadWorker = new LoadWorker();
-  private loadWorker: PromiseWorker = new PromiseWorker(this._loadWorker);
+  private loadWorker = new WorkerManager(new LoadWorker(), {
+    blockingChannel: true,
+  });
 
   loadErrorNotifier = new Notifier(
     'Unable to load citations. Please update Citations plugin settings.',
@@ -166,7 +168,7 @@ export default class CitationPlugin extends Plugin {
           const decoder = new TextDecoder('utf8');
           const value = decoder.decode(dataView);
 
-          return this.loadWorker.postMessage({
+          return this.loadWorker.post({
             databaseRaw: value,
             databaseType: this.settings.citationExportFormat,
           });
@@ -189,6 +191,9 @@ export default class CitationPlugin extends Plugin {
           this.library = Object.fromEntries(
             entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
           );
+          console.debug(
+            `Citation plugin: successfully loaded library with ${entries.length} entries.`,
+          );
 
           return this.library;
         })
@@ -203,6 +208,13 @@ export default class CitationPlugin extends Plugin {
         'Citations plugin: citation export path is not set. Please update plugin settings.',
       );
     }
+  }
+
+  /**
+   * Returns true iff the library is currently being loaded on the worker thread.
+   */
+  get isLibraryLoading(): boolean {
+    return this.loadWorker.blocked;
   }
 
   TEMPLATE_VARIABLES = {
