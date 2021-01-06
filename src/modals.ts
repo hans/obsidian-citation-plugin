@@ -14,13 +14,33 @@ class SearchModal extends FuzzySuggestModal<Entry> {
   plugin: CitationPlugin;
   limit = 50;
 
+  loadingEl: HTMLElement;
+  loadingCheckerHandle: NodeJS.Timeout;
+  // How frequently should we check whether the library is still loading?
+  loadingCheckInterval = 250;
+
   constructor(app: App, plugin: CitationPlugin) {
     super(app);
     this.plugin = plugin;
+
+    this.resultContainerEl.addClass('zoteroModalResults');
+
+    this.loadingEl = this.resultContainerEl.parentElement.createEl('div', {
+      cls: 'zoteroModalLoading',
+    });
+    this.loadingEl.createEl('div', { cls: 'zoteroModalLoadingAnimation' });
+    this.loadingEl.createEl('p', {
+      text: 'Loading citation database. Please wait...',
+    });
   }
 
   onOpen() {
     super.onOpen();
+
+    this.checkLoading();
+    this.loadingCheckerHandle = setInterval(() => {
+      this.checkLoading();
+    }, this.loadingCheckInterval);
 
     // Don't immediately register keyevent listeners. If the modal was triggered
     // by an "Enter" keystroke (e.g. via the Obsidian command dialog), this event
@@ -29,6 +49,28 @@ class SearchModal extends FuzzySuggestModal<Entry> {
       this.inputEl.addEventListener('keydown', (ev) => this.onInputKeydown(ev));
       this.inputEl.addEventListener('keyup', (ev) => this.onInputKeyup(ev));
     }, 50);
+  }
+
+  onClose() {
+    if (this.loadingCheckerHandle) {
+      clearInterval(this.loadingCheckerHandle);
+    }
+  }
+
+  /**
+   * Check if the library is currently being loaded. If so, display animation
+   * and disable input. Otherwise hide animation and enable input.
+   */
+  checkLoading() {
+    if (this.plugin.isLibraryLoading) {
+      this.loadingEl.removeClass('d-none');
+      this.inputEl.disabled = true;
+      this.resultContainerEl.empty();
+    } else {
+      this.loadingEl.addClass('d-none');
+      this.inputEl.disabled = false;
+      this.inputEl.focus();
+    }
   }
 
   getItems(): Entry[] {

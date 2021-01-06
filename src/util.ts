@@ -100,9 +100,7 @@ export class WorkerManager {
    */
   async post<TResult = any, TInput = any>(msg: TInput): Promise<TResult> {
     if (this.options.blockingChannel && this.blocked) {
-      throw new Error(
-        'WorkerManager: discarded message because channel is blocked',
-      );
+      throw new WorkerManagerBlocked();
     }
 
     this.blocked = true;
@@ -110,6 +108,13 @@ export class WorkerManager {
       this.blocked = false;
       return result;
     });
+  }
+}
+
+export class WorkerManagerBlocked extends Error {
+  constructor() {
+    super('WorkerManager: discarded message because channel is blocked');
+    Object.setPrototypeOf(this, WorkerManagerBlocked.prototype);
   }
 }
 

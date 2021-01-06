@@ -31,6 +31,7 @@ import {
   formatTemplate,
   Notifier,
   WorkerManager,
+  WorkerManagerBlocked,
 } from './util';
 import LoadWorker from 'web-worker:./worker';
 
@@ -198,6 +199,12 @@ export default class CitationPlugin extends Plugin {
           return this.library;
         })
         .catch((e) => {
+          if (e instanceof WorkerManagerBlocked) {
+            // Silently catch WorkerManager error, which will be thrown if the
+            // library is already being loaded
+            return;
+          }
+
           console.error(e);
           this.loadErrorNotifier.show();
 

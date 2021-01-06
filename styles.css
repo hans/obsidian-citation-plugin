@@ -1,3 +1,38 @@
+/** Citations modal **/
+
+/*
+ * Loading animation from
+ * https://loading.io/css/
+ */
+ .zoteroModalLoading {
+   color: var(--text-muted);
+   text-align: center;
+ }
+.zoteroModalLoadingAnimation {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+}
+.zoteroModalLoadingAnimation {
+  content: " ";
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 10px auto;
+  border-radius: 50%;
+  border: 3px solid #eee;
+  border-color: #eee transparent #eee transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 ul#citationTemplateVariables .text-monospace {
   font-family: monospace;
 }
