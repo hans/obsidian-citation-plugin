@@ -150,13 +150,13 @@ export default class CitationPlugin extends Plugin {
     return path.resolve(vaultRoot, rawPath);
   }
 
-  async loadLibrary(): Promise<void> {
+  async loadLibrary(): Promise<Library> {
     console.debug('Citation plugin: Reloading library');
     if (this.settings.citationExportPath) {
       const filePath = this.resolveLibraryPath(
         this.settings.citationExportPath,
       );
-      await FileSystemAdapter.readLocalFile(filePath)
+      return FileSystemAdapter.readLocalFile(filePath)
         .then((buffer) => {
           // If there is a remaining error message, hide it
           this.loadErrorNotifier.hide();
@@ -189,10 +189,14 @@ export default class CitationPlugin extends Plugin {
           this.library = Object.fromEntries(
             entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
           );
+
+          return this.library;
         })
         .catch((e) => {
           console.error(e);
           this.loadErrorNotifier.show();
+
+          return null;
         });
     } else {
       console.warn(
