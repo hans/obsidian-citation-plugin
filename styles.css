@@ -1,33 +1,71 @@
-ul#citationTemplateVariables .text-monospace { font-family: monospace; }
+ul#citationTemplateVariables .text-monospace {
+  font-family: monospace;
+}
 
-.zoteroTitle { font-size: 14px; display: block; }
-.zoteroAuthors { color: #555; font-size: 13px; }
-.zoteroAuthorsEmpty::after {font-style: italic; content: "Unknown authors"; }
+.zoteroTitle {
+  font-size: 14px;
+  display: block;
+}
+.zoteroAuthors {
+  color: #555;
+  font-size: 13px;
+}
+.zoteroAuthorsEmpty::after {
+  font-style: italic;
+  content: 'Unknown authors';
+}
 .zoteroCitekey {
-  color: #555; font-size: 13px; font-family: monospace;
-  display: inline-block; margin-right: 5px; padding-right: 5px;
+  color: #555;
+  font-size: 13px;
+  font-family: monospace;
+  display: inline-block;
+  margin-right: 5px;
+  padding-right: 5px;
   border-right: 1px solid #ccc;
 }
 
-
-.theme-dark .zoteroTitle { font-size: 14px; display: block; }
-.theme-dark .zoteroAuthors { color: #aaa; font-size: 13px; }
+.theme-dark .zoteroTitle {
+  font-size: 14px;
+  display: block;
+}
+.theme-dark .zoteroAuthors {
+  color: #aaa;
+  font-size: 13px;
+}
 .theme-dark .zoteroCitekey {
-  color: #aaa; font-size: 13px; font-family: monospace;
-  display: inline-block; margin-right: 5px; padding-right: 5px;
+  color: #aaa;
+  font-size: 13px;
+  font-family: monospace;
+  display: inline-block;
+  margin-right: 5px;
+  padding-right: 5px;
   border-right: 1px solid #aaa;
 }
 
-
 /** Settings dialog **/
-.d-none { display: none; }
-.zoteroSettingCitationPathError, .zoteroSettingCitationPathSuccess {
+.d-none {
+  display: none;
+}
+.zoteroSettingCitationPathLoading,
+.zoteroSettingCitationPathError,
+.zoteroSettingCitationPathSuccess {
   font-size: 14px;
 }
-.zoteroSettingCitationPathError { color: var(--text-error); }
-.zoteroSettingCitationPathError:hover { color: var(--text-error-hover); }
-.zoteroSettingCitationPathSuccess { color: var(--text-accent); }
-.zoteroSettingCitationPathSuccess:hover { color: var(--text-accent-hover); }
+.zoteroSettingCitationPathLoading {
+  color: var(--text-muted);
+}
+.zoteroSettingCitationPathError {
+  color: var(--text-error);
+}
+.zoteroSettingCitationPathError:hover {
+  color: var(--text-error-hover);
+}
+.zoteroSettingCitationPathSuccess {
+  color: var(--text-accent);
+}
+.zoteroSettingCitationPathSuccess:hover {
+  color: var(--text-accent-hover);
+}
 
 #zoteroSettingTab textarea {
   resize: vertical;

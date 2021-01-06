@@ -1,20 +1,22 @@
 import {
   AbstractTextComponent,
   App,
+  DropdownComponent,
   FileSystemAdapter,
   PluginSettingTab,
   Setting,
 } from 'obsidian';
 import CitationPlugin from './main';
+import { IIndexable, DatabaseType } from './types';
 
-// Trick: allow string indexing onto object properties
-export interface IIndexable {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
+const CITATION_DATABASE_FORMAT_LABELS: Record<DatabaseType, string> = {
+  'csl-json': 'CSL-JSON',
+  biblatex: 'BibLaTeX',
+};
 
 export class CitationsPluginSettings {
   public citationExportPath: string;
+  citationExportFormat: DatabaseType = 'csl-json';
 
   literatureNoteTitleTemplate = '@{{citekey}}';
   literatureNoteFolder = 'Reading notes';
@@ -32,6 +34,7 @@ export class CitationsPluginSettings {
 export class CitationSettingTab extends PluginSettingTab {
   private plugin: CitationPlugin;
 
+  citationPathLoadingEl: HTMLElement;
   citationPathErrorEl: HTMLElement;
   citationPathSuccessEl: HTMLElement;
 
@@ -47,8 +50,8 @@ export class CitationSettingTab extends PluginSettingTab {
     ).then(() => this.showCitationExportPathSuccess());
   }
 
-  addTextChangeCallback<T extends HTMLTextAreaElement | HTMLInputElement>(
-    component: AbstractTextComponent<T>,
+  addValueChangeCallback<T extends HTMLTextAreaElement | HTMLInputElement>(
+    component: AbstractTextComponent<T> | DropdownComponent,
     settingsKey: string,
     cb?: (value: string) => void,
   ): void {
@@ -62,13 +65,13 @@ export class CitationSettingTab extends PluginSettingTab {
     });
   }
 
-  buildTextInput<T extends HTMLTextAreaElement | HTMLInputElement>(
-    component: AbstractTextComponent<T>,
+  buildValueInput<T extends HTMLTextAreaElement | HTMLInputElement>(
+    component: AbstractTextComponent<T> | DropdownComponent,
     settingsKey: string,
     cb?: (value: string) => void,
   ): void {
     component.setValue((this.plugin.settings as IIndexable)[settingsKey]);
-    this.addTextChangeCallback(component, settingsKey, cb);
+    this.addValueChangeCallback(component, settingsKey, cb);
   }
 
   display(): void {
@@ -79,16 +82,40 @@ export class CitationSettingTab extends PluginSettingTab {
 
     containerEl.createEl('h2', { text: 'Citation plugin settings' });
 
+    new Setting(containerEl)
+      .setName('Citation database format')
+      .addDropdown((component) =>
+        this.buildValueInput(
+          component.addOptions(CITATION_DATABASE_FORMAT_LABELS),
+          'citationExportFormat',
+          (value) => {
+            this.checkCitationExportPath(
+              this.plugin.settings.citationExportPath,
+            ).then((success) => {
+              if (success) {
+                this.citationPathSuccessEl.addClass('d-none');
+                this.citationPathLoadingEl.removeClass('d-none');
+
+                this.plugin.loadLibrary().then(() => {
+                  this.citationPathLoadingEl.addClass('d-none');
+                  this.showCitationExportPathSuccess();
+                });
+              }
+            });
+          },
+        ),
+      );
+
     // NB: we force reload of the library on path change.
     new Setting(containerEl)
-      .setName('Citation export path')
+      .setName('Citation database path')
       .setDesc(
         'Path to citation library exported by your reference manager. ' +
           'Can be an absolute path or a path relative to the current vault root folder. ' +
           'Citations will be automatically reloaded whenever this file updates.',
       )
       .addText((input) =>
-        this.buildTextInput(
+        this.buildValueInput(
           input.setPlaceholder('/path/to/export.json'),
           'citationExportPath',
           (value) => {
@@ -103,6 +130,10 @@ export class CitationSettingTab extends PluginSettingTab {
         ),
       );
 
+    this.citationPathLoadingEl = containerEl.createEl('p', {
+      cls: 'zoteroSettingCitationPathLoading d-none',
+      text: 'Loading citation database...',
+    });
     this.citationPathErrorEl = containerEl.createEl('p', {
       cls: 'zoteroSettingCitationPathError d-none',
       text:
@@ -115,7 +146,7 @@ export class CitationSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Literature note folder')
-      .addText((input) => this.buildTextInput(input, 'literatureNoteFolder'))
+      .addText((input) => this.buildValueInput(input, 'literatureNoteFolder'))
       .setDesc(
         'Save literature note files in this folder within your vault. If empty, notes will be stored in the root directory of the vault.',
       );
@@ -146,13 +177,13 @@ export class CitationSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Literature note title template')
       .addText((input) =>
-        this.buildTextInput(input, 'literatureNoteTitleTemplate'),
+        this.buildValueInput(input, 'literatureNoteTitleTemplate'),
       );
 
     new Setting(containerEl)
       .setName('Literature note content template')
       .addTextArea((input) =>
-        this.buildTextInput(input, 'literatureNoteContentTemplate'),
+        this.buildValueInput(input, 'literatureNoteContentTemplate'),
       );
 
     containerEl.createEl('h3', { text: 'Markdown citation settings' });
@@ -164,13 +195,13 @@ export class CitationSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Markdown primary citation template')
       .addText((input) =>
-        this.buildTextInput(input, 'markdownCitationTemplate'),
+        this.buildValueInput(input, 'markdownCitationTemplate'),
       );
 
     new Setting(containerEl)
       .setName('Markdown secondary citation template')
       .addText((input) =>
-        this.buildTextInput(input, 'alternativeMarkdownCitationTemplate'),
+        this.buildValueInput(input, 'alternativeMarkdownCitationTemplate'),
       );
   }
 
@@ -178,6 +209,8 @@ export class CitationSettingTab extends PluginSettingTab {
    * Returns true iff the path exists; displays error as a side-effect
    */
   async checkCitationExportPath(filePath: string): Promise<boolean> {
+    this.citationPathLoadingEl.addClass('d-none');
+
     try {
       await FileSystemAdapter.readLocalFile(
         this.plugin.resolveLibraryPath(filePath),

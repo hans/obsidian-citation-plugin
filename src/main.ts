@@ -9,27 +9,36 @@ import {
 import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
+import PromiseWorker from 'promise-worker';
+
 import {
   InsertCitationModal,
   InsertNoteLinkModal,
   OpenNoteModal,
 } from './modals';
 
+import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import {
-  CitationSettingTab,
-  CitationsPluginSettings,
+  Entry,
+  EntryData,
+  EntryBibLaTeXAdapter,
+  EntryCSLAdapter,
   IIndexable,
-} from './settings';
-import { Entry, EntryData } from './types';
+  Library,
+} from './types';
 import {
   DISALLOWED_FILENAME_CHARACTERS_RE,
   formatTemplate,
   Notifier,
 } from './util';
+import LoadWorker from 'web-worker:./worker';
 
 export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
-  library: { [id: string]: Entry } = {};
+  library: Library = {};
+
+  private _loadWorker = new LoadWorker();
+  private loadWorker: PromiseWorker = new PromiseWorker(this._loadWorker);
 
   loadErrorNotifier = new Notifier(
     'Unable to load citations. Please update Citations plugin settings.',
@@ -54,6 +63,7 @@ export default class CitationPlugin extends Plugin {
 
     const toLoad = [
       'citationExportPath',
+      'citationExportFormat',
       'literatureNoteTitleTemplate',
       'literatureNoteFolder',
       'literatureNoteContentTemplate',
@@ -140,45 +150,59 @@ export default class CitationPlugin extends Plugin {
     return path.resolve(vaultRoot, rawPath);
   }
 
-  async loadLibrary(): Promise<void> {
+  async loadLibrary(): Promise<Library> {
     console.debug('Citation plugin: Reloading library');
     if (this.settings.citationExportPath) {
       const filePath = this.resolveLibraryPath(
         this.settings.citationExportPath,
       );
-      return (
-        FileSystemAdapter.readLocalFile(filePath)
-          .then((buffer) => {
-            // If there is a remaining error message, hide it
-            this.loadErrorNotifier.hide();
+      return FileSystemAdapter.readLocalFile(filePath)
+        .then((buffer) => {
+          // If there is a remaining error message, hide it
+          this.loadErrorNotifier.hide();
 
-            this.onLibraryUpdate(buffer);
-          })
-          .catch(() => this.loadErrorNotifier.show())
-          // Return Promise which resolves only when library is loaded
-          .then()
-      );
+          // Decode file as UTF-8.
+          const dataView = new DataView(buffer);
+          const decoder = new TextDecoder('utf8');
+          const value = decoder.decode(dataView);
+
+          return this.loadWorker.postMessage({
+            databaseRaw: value,
+            databaseType: this.settings.citationExportFormat,
+          });
+        })
+        .then((entries: EntryData[]) => {
+          let adapter: new (data: EntryData) => Entry;
+          let idKey: string;
+
+          switch (this.settings.citationExportFormat) {
+            case 'biblatex':
+              adapter = EntryBibLaTeXAdapter;
+              idKey = 'key';
+              break;
+            case 'csl-json':
+              adapter = EntryCSLAdapter;
+              idKey = 'id';
+              break;
+          }
+
+          this.library = Object.fromEntries(
+            entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
+          );
+
+          return this.library;
+        })
+        .catch((e) => {
+          console.error(e);
+          this.loadErrorNotifier.show();
+
+          return null;
+        });
     } else {
       console.warn(
         'Citations plugin: citation export path is not set. Please update plugin settings.',
       );
     }
-  }
-
-  onLibraryUpdate(libraryBuffer: ArrayBuffer): void {
-    // Decode file as UTF-8
-    const dataView = new DataView(libraryBuffer);
-    const decoder = new TextDecoder('utf8');
-    const value = decoder.decode(dataView);
-
-    const libraryArray = JSON.parse(value);
-    // Index by citekey
-    this.library = Object.fromEntries(
-      libraryArray.map((entryData: EntryData) => [
-        entryData.id,
-        new Entry(entryData),
-      ]),
-    );
   }
 
   TEMPLATE_VARIABLES = {
