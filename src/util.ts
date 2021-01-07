@@ -4,7 +4,7 @@ import PromiseWorker from 'promise-worker';
 
 import { NoticeExt } from './obsidian-extensions';
 
-export const DISALLOWED_FILENAME_CHARACTERS_RE = /[*"\\/<>:|?]/;
+export const DISALLOWED_FILENAME_CHARACTERS_RE = /[*"\\/<>:|?]/g;
 
 export function formatTemplate(
   template: string,
