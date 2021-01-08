@@ -104,10 +104,16 @@ export class WorkerManager {
     }
 
     this.blocked = true;
-    return this.worker.postMessage(msg).then((result) => {
-      this.blocked = false;
-      return result;
-    });
+    return this.worker.postMessage(msg).then(
+      (result) => {
+        this.blocked = false;
+        return result;
+      },
+      (error) => {
+        this.blocked = false;
+        throw error;
+      },
+    );
   }
 }
 
