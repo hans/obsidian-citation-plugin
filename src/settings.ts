@@ -6,7 +6,7 @@ import {
   PluginSettingTab,
   Setting,
 } from 'obsidian';
-import CitationPlugin from './main';
+import { CitationPlugin } from './main';
 import { IIndexable, DatabaseType } from './types';
 
 const CITATION_DATABASE_FORMAT_LABELS: Record<DatabaseType, string> = {

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "jest"
   },
   "keywords": [],
   "author": "Jon Gauthier",
@@ -16,6 +17,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-typescript": "^6.0.0",
+    "@types/jest": "^26.0.20",
     "@types/node": "^14.14.2",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
@@ -24,10 +26,12 @@
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-prettier": "^3.3.0",
     "husky": "^4.3.6",
+    "jest": "^26.6.3",
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "prettier": "^2.2.1",
     "rollup": "^2.32.1",
     "rollup-plugin-web-worker-loader": "^1.5.0",
+    "ts-jest": "^26.4.4",
     "tslib": "^2.0.3",
     "typescript": "^4.1.3"
   },
@@ -39,5 +43,17 @@
   "lint-staged": {
     "*.ts": "eslint --fix",
     "*.json": "prettier --write"
+  },
+  "jest": {
+	"moduleNameMapper": {
+	  "src/(.*)": "<rootDir>/src/$1"
+	},
+	"moduleFileExtensions": [
+	  "js",
+	  "ts", "d.ts"
+	],
+	"transform": {
+	  "^.+\\.ts$": "ts-jest"
+	}
   }
 }

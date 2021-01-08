@@ -35,7 +35,7 @@ import {
 } from './util';
 import LoadWorker from 'web-worker:./worker';
 
-export default class CitationPlugin extends Plugin {
+export class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
   library: Library = {};
 

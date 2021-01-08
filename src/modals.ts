@@ -1,5 +1,5 @@
 import { App, FuzzyMatch, FuzzySuggestModal } from 'obsidian';
-import CitationPlugin from './main';
+import { CitationPlugin } from './main';
 import { Entry } from './types';
 
 // Stub some methods we know are there..
