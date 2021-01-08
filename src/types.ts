@@ -1,5 +1,7 @@
 import * as BibTeXParser from '@retorquere/bibtex-parser';
 import { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
+// Also make EntryDataBibLaTeX available to other modules
+export { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
 
 // Trick: allow string indexing onto object properties
 export interface IIndexable {
@@ -25,7 +27,7 @@ export const TEMPLATE_VARIABLES = {
 };
 
 export class Library {
-  entries: { [citekey: string]: Entry };
+  constructor(public entries: { [citekey: string]: Entry }) {}
 
   /**
    * For the given citekey, find the corresponding `Entry` and return a

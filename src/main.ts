@@ -189,8 +189,10 @@ export default class CitationPlugin extends Plugin {
               break;
           }
 
-          this.library = Object.fromEntries(
-            entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
+          this.library = new Library(
+            Object.fromEntries(
+              entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
+            ),
           );
           console.debug(
             `Citation plugin: successfully loaded library with ${entries.length} entries.`,
