@@ -9,7 +9,6 @@ import {
 import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
-import PromiseWorker from 'promise-worker';
 
 import {
   InsertCitationModal,

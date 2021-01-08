@@ -170,7 +170,7 @@ export class EntryCSLAdapter extends Entry {
     )
       return null;
 
-    let [year, month, day] = this.data.issued['date-parts'][0];
+    const [year, month, day] = this.data.issued['date-parts'][0];
     return new Date(year, (month || 1) - 1, day || 1);
   }
 
