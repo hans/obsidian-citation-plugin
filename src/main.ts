@@ -37,7 +37,7 @@ import LoadWorker from 'web-worker:./worker';
 
 export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
-  library: Library = {};
+  library: Library;
 
   private loadWorker = new WorkerManager(new LoadWorker(), {
     blockingChannel: true,
@@ -224,40 +224,10 @@ export default class CitationPlugin extends Plugin {
     return this.loadWorker.blocked;
   }
 
-  TEMPLATE_VARIABLES = {
-    citekey: 'Unique citekey',
-    abstract: '',
-    authorString: 'Comma-separated list of author names',
-    containerTitle:
-      'Title of the container holding the reference (e.g. book title for a book chapter, or the journal title for a journal article)',
-    DOI: '',
-    page: 'Page or page range',
-    title: '',
-    URL: '',
-    year: 'Publication year',
-    zoteroSelectURI: 'URI to open the reference in Zotero',
-  };
-  getTemplateVariablesForCitekey(citekey: string): Record<string, string> {
-    const entry: Entry = this.library[citekey];
-    return {
-      citekey: citekey,
-
-      abstract: entry.abstract,
-      authorString: entry.authorString,
-      containerTitle: entry.containerTitle,
-      DOI: entry.DOI,
-      page: entry.page,
-      title: entry.title,
-      URL: entry.URL,
-      year: entry.year?.toString(),
-      zoteroSelectURI: entry.zoteroSelectURI,
-    };
-  }
-
   getTitleForCitekey(citekey: string): string {
     const unsafeTitle = formatTemplate(
       this.settings.literatureNoteTitleTemplate,
-      this.getTemplateVariablesForCitekey(citekey),
+      this.library.getTemplateVariablesForCitekey(citekey),
     );
     return unsafeTitle.replace(DISALLOWED_FILENAME_CHARACTERS_RE, '_');
   }
@@ -271,21 +241,21 @@ export default class CitationPlugin extends Plugin {
   getInitialContentForCitekey(citekey: string): string {
     return formatTemplate(
       this.settings.literatureNoteContentTemplate,
-      this.getTemplateVariablesForCitekey(citekey),
+      this.library.getTemplateVariablesForCitekey(citekey),
     );
   }
 
   getMarkdownCitationForCitekey(citekey: string): string {
     return formatTemplate(
       this.settings.markdownCitationTemplate,
-      this.getTemplateVariablesForCitekey(citekey),
+      this.library.getTemplateVariablesForCitekey(citekey),
     );
   }
 
   getAlternativeMarkdownCitationForCitekey(citekey: string): string {
     return formatTemplate(
       this.settings.alternativeMarkdownCitationTemplate,
-      this.getTemplateVariablesForCitekey(citekey),
+      this.library.getTemplateVariablesForCitekey(citekey),
     );
   }
 

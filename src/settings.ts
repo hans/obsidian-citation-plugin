@@ -7,7 +7,7 @@ import {
   Setting,
 } from 'obsidian';
 import CitationPlugin from './main';
-import { IIndexable, DatabaseType } from './types';
+import { IIndexable, DatabaseType, TEMPLATE_VARIABLES } from './types';
 
 const CITATION_DATABASE_FORMAT_LABELS: Record<DatabaseType, string> = {
   'csl-json': 'CSL-JSON',
@@ -160,7 +160,7 @@ export class CitationSettingTab extends PluginSettingTab {
     const templateVariableUl = containerEl.createEl('ul', {
       attr: { id: 'citationTemplateVariables' },
     });
-    Object.entries(this.plugin.TEMPLATE_VARIABLES).forEach((variableData) => {
+    Object.entries(TEMPLATE_VARIABLES).forEach((variableData) => {
       const [key, description] = variableData,
         templateVariableItem = templateVariableUl.createEl('li');
 

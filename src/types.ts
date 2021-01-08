@@ -1,3 +1,4 @@
+import * as BibTeXParser from '@retorquere/bibtex-parser';
 import { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
 
 // Trick: allow string indexing onto object properties
@@ -9,7 +10,66 @@ export interface IIndexable {
 const databaseTypes = ['csl-json', 'biblatex'] as const;
 export type DatabaseType = typeof databaseTypes[number];
 
-export type Library = { [citekey: string]: Entry };
+export const TEMPLATE_VARIABLES = {
+  citekey: 'Unique citekey',
+  abstract: '',
+  authorString: 'Comma-separated list of author names',
+  containerTitle:
+    'Title of the container holding the reference (e.g. book title for a book chapter, or the journal title for a journal article)',
+  DOI: '',
+  page: 'Page or page range',
+  title: '',
+  URL: '',
+  year: 'Publication year',
+  zoteroSelectURI: 'URI to open the reference in Zotero',
+};
+
+export class Library {
+  entries: { [citekey: string]: Entry };
+
+  /**
+   * For the given citekey, find the corresponding `Entry` and return a
+   * collection of template variable assignments.
+   */
+  getTemplateVariablesForCitekey(citekey: string): Record<string, string> {
+    const entry: Entry = this.entries[citekey];
+    return {
+      citekey: citekey,
+
+      abstract: entry.abstract,
+      authorString: entry.authorString,
+      containerTitle: entry.containerTitle,
+      DOI: entry.DOI,
+      page: entry.page,
+      title: entry.title,
+      URL: entry.URL,
+      year: entry.year?.toString(),
+      zoteroSelectURI: entry.zoteroSelectURI,
+    };
+  }
+}
+
+/**
+ * Load reference entries from the given raw database data.
+ *
+ * Returns a list of `EntryData`, which should be wrapped with the relevant
+ * adapter and used to instantiate a `Library`.
+ */
+export function loadEntries(
+  databaseRaw: string,
+  databaseType: DatabaseType,
+): EntryData[] {
+  let libraryArray: EntryData[];
+
+  if (databaseType == 'csl-json') {
+    libraryArray = JSON.parse(databaseRaw);
+  } else if (databaseType == 'biblatex') {
+    const parsed = BibTeXParser.parse(databaseRaw) as BibTeXParser.Bibliography;
+    libraryArray = parsed.entries;
+  }
+
+  return libraryArray;
+}
 
 export interface Author {
   given?: string;
