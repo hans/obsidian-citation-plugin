@@ -4,7 +4,7 @@ This plugin for [Obsidian](https://obsidian.md) integrates your academic referen
 
 ![](docs/screenshot.png)
 
-The plugin supports reading bibliographies in [CSL-JSON format][1].
+The plugin supports reading bibliographies in [BibTeX / BibLaTeX `.bib` format][4] and [CSL-JSON format][1].
 
 ## Setup
 
@@ -14,10 +14,11 @@ Once the plugin is installed, you must provide it with a bibliography file:
 
 - If you use **Zotero** with [Better BibTeX][2]:
   - Select a collection in Zotero's left sidebar that you want to export.
-  - Click `File` -> `Export library ...`. Select `Better CSL JSON` as the format. You can optionally choose "Keep updated" to automatically re-export the collection -- this is recommended!
-- If you use other reference managers, check their documentation for CSL-JSON export support. We plan to officially support other managers in the future.
+  - Click `File` -> `Export library ...`. Select `Better BibLaTeX` or `Better CSL JSON` as the format. (We recommend using the BibLaTeX export unless you experience performance issues. The BibLaTeX format includes more information that you can reference from Obsidian, such as associated PDF attachments, but loads more slowly than the JSON export.)
+  - You can optionally choose "Keep updated" to automatically re-export the collection -- this is recommended!
+- If you use other reference managers, check their documentation for BibLaTeX or CSL-JSON export support. We plan to officially support other managers in the future.
 
-Now open the Obsidian preferences and view the "Citations" tab. Paste the path to the JSON export in the text field labeled "Citation export path." After closing the settings dialog, you should now be able to search your references from Zotero!
+Now open the Obsidian preferences and view the "Citations" tab. Paste the path to the exported file (`.bib` or `.json`, depending on the format you chose) in the text field labeled "Citation export path." After closing the settings dialog, you should now be able to search your references from within Obsidian!
 
 ## Usage
 
@@ -39,3 +40,4 @@ MIT License.
 [1]: https://github.com/citation-style-language/schema#csl-json-schema
 [2]: https://retorque.re/zotero-better-bibtex/
 [3]: https://pandoc.org/MANUAL.html#extension-citations
+[4]: http://www.bibtex.org/
