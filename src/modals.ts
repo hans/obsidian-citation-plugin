@@ -74,7 +74,11 @@ class SearchModal extends FuzzySuggestModal<Entry> {
   }
 
   getItems(): Entry[] {
-    return Object.values(this.plugin.library);
+    if (this.plugin.isLibraryLoading) {
+      return [];
+    }
+
+    return Object.values(this.plugin.library.entries);
   }
 
   getItemText(item: Entry): string {

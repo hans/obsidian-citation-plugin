@@ -228,9 +228,8 @@ export class CitationSettingTab extends PluginSettingTab {
   showCitationExportPathSuccess(): void {
     if (!this.plugin.library) return;
 
-    const numReferences = Object.keys(this.plugin.library).length;
     this.citationPathSuccessEl.setText(
-      `Loaded library with ${numReferences} references.`,
+      `Loaded library with ${this.plugin.library.size} references.`,
     );
     this.citationPathSuccessEl.removeClass('d-none');
   }

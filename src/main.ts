@@ -159,6 +159,10 @@ export default class CitationPlugin extends Plugin {
       const filePath = this.resolveLibraryPath(
         this.settings.citationExportPath,
       );
+
+      // Unload current library.
+      this.library = null;
+
       return FileSystemAdapter.readLocalFile(filePath)
         .then((buffer) => {
           // If there is a remaining error message, hide it
@@ -195,7 +199,7 @@ export default class CitationPlugin extends Plugin {
             ),
           );
           console.debug(
-            `Citation plugin: successfully loaded library with ${entries.length} entries.`,
+            `Citation plugin: successfully loaded library with ${this.library.size} entries.`,
           );
 
           return this.library;

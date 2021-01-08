@@ -29,6 +29,10 @@ export const TEMPLATE_VARIABLES = {
 export class Library {
   constructor(public entries: { [citekey: string]: Entry }) {}
 
+  get size(): number {
+    return Object.keys(this.entries).length;
+  }
+
   /**
    * For the given citekey, find the corresponding `Entry` and return a
    * collection of template variable assignments.
