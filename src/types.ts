@@ -66,7 +66,11 @@ export function loadEntries(
   if (databaseType == 'csl-json') {
     libraryArray = JSON.parse(databaseRaw);
   } else if (databaseType == 'biblatex') {
-    const parsed = BibTeXParser.parse(databaseRaw) as BibTeXParser.Bibliography;
+    const options: BibTeXParser.ParserOptions = {};
+    const parsed = BibTeXParser.parse(
+      databaseRaw,
+      options,
+    ) as BibTeXParser.Bibliography;
     libraryArray = parsed.entries;
   }
 
@@ -94,7 +98,7 @@ export abstract class Entry {
   abstract URL?: string;
 
   get year(): number {
-    return this.issuedDate?.getFullYear();
+    return this.issuedDate?.getUTCFullYear();
   }
 
   get zoteroSelectURI(): string {
@@ -163,7 +167,7 @@ export class EntryCSLAdapter extends Entry {
       return null;
 
     let [year, month, day] = this.data.issued['date-parts'][0];
-    return new Date(year, month - 1, day);
+    return new Date(year, (month || 1) - 1, day || 1);
   }
 
   get page() {
@@ -181,11 +185,11 @@ export class EntryCSLAdapter extends Entry {
 
 const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   abstract: 'abstract',
-  booktitle: 'containerTitle',
+  booktitle: '_containerTitle',
   date: 'issued',
   doi: 'DOI',
   eventtitle: 'event',
-  journaltitle: 'containerTitle',
+  journaltitle: '_containerTitle',
   pages: 'page',
   shortjournal: 'containerTitleShort',
   title: 'title',
@@ -198,6 +202,7 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
 const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
   'abstract',
   'booktitle',
+  '_containerTitle',
   'date',
   'doi',
   'eventtitle',
@@ -211,7 +216,7 @@ const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
 
 export class EntryBibLaTeXAdapter extends Entry {
   abstract?: string;
-  containerTitle?: string;
+  _containerTitle?: string;
   containerTitleShort?: string;
   DOI?: string;
   event?: string;
@@ -229,7 +234,7 @@ export class EntryBibLaTeXAdapter extends Entry {
         const [src, tgt] = map;
         if (src in this.data.fields) {
           let val = this.data.fields[src];
-          if (src in BIBLATEX_PROPERTY_TAKE_FIRST) {
+          if (BIBLATEX_PROPERTY_TAKE_FIRST.includes(src)) {
             val = (val as any[])[0];
           }
 
@@ -257,6 +262,20 @@ export class EntryBibLaTeXAdapter extends Entry {
       return names.join(', ');
     } else {
       return this.data.fields.author?.join(', ');
+    }
+  }
+
+  get containerTitle() {
+    if (this._containerTitle) {
+      return this._containerTitle;
+    } else if (this.data.fields.eprint) {
+      const prefix = this.data.fields.eprinttype
+        ? `${this.data.fields.eprinttype}:`
+        : '';
+      const suffix = this.data.fields.primaryclass
+        ? ` [${this.data.fields.primaryclass}]`
+        : '';
+      return `${prefix}${this.data.fields.eprint}${suffix}`;
     }
   }
 
