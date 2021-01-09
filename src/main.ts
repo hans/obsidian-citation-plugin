@@ -93,10 +93,6 @@ export default class CitationPlugin extends Plugin {
       this.loadLibrary();
 
       // Set up a watcher to refresh whenever the export is updated
-      //
-      // TODO this gets triggered a lot when the library is re-exported, with
-      // "evt" always "change". Fine to just wastefully respond every time,
-      // from what I can see
       try {
         watch(this.settings.citationExportPath, () => {
           this.loadLibrary();
