@@ -1,4 +1,11 @@
-import { App, FuzzyMatch, FuzzySuggestModal } from 'obsidian';
+import {
+  App,
+  FuzzyMatch,
+  FuzzySuggestModal,
+  renderMatches,
+  SearchMatches,
+  SearchMatchPart,
+} from 'obsidian';
 import CitationPlugin from './main';
 import { Entry } from './types';
 
@@ -95,13 +102,63 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     const entry = match.item;
 
     const container = el.createEl('div', { cls: 'zoteroResult' });
-    container.createEl('span', { cls: 'zoteroTitle', text: entry.title });
+    const titleEl = container.createEl('span', {
+      cls: 'zoteroTitle',
+    });
     container.createEl('span', { cls: 'zoteroCitekey', text: entry.id });
 
     const authorsCls = entry.authorString
       ? 'zoteroAuthors'
       : 'zoteroAuthors zoteroAuthorsEmpty';
-    container.createEl('span', { cls: authorsCls, text: entry.authorString });
+    const authorsEl = container.createEl('span', {
+      cls: authorsCls,
+    });
+
+    // Prepare to highlight string matches for each part of the search item.
+    // Compute offsets of each rendered element's content within the string
+    // returned by `getItemText`.
+    const allMatches = match.match.matches;
+    const authorStringOffset = 1 + entry.title.length;
+
+    // Filter a match list to contain only the relevant matches for a given
+    // substring, and with match indices shifted relative to the start of that
+    // substring
+    const shiftMatches = (
+      matches: SearchMatches,
+      start: number,
+      end: number,
+    ) => {
+      return matches
+        .map((match: SearchMatchPart) => {
+          const [matchStart, matchEnd] = match;
+          return [
+            matchStart - start,
+            Math.min(matchEnd - start, end),
+          ] as SearchMatchPart;
+        })
+        .filter((match: SearchMatchPart) => {
+          const [matchStart, matchEnd] = match;
+          return matchStart >= 0;
+        });
+    };
+
+    // Now highlight matched strings within each element
+    renderMatches(
+      titleEl,
+      entry.title,
+      shiftMatches(allMatches, 0, entry.title.length),
+    );
+    if (entry.authorString) {
+      renderMatches(
+        authorsEl,
+        entry.authorString,
+        shiftMatches(
+          allMatches,
+          authorStringOffset,
+          authorStringOffset + entry.authorString.length,
+        ),
+      );
+    }
   }
 
   onInputKeydown(ev: KeyboardEvent) {
