@@ -32,6 +32,8 @@ class SearchModal extends FuzzySuggestModal<Entry> {
 
     this.resultContainerEl.addClass('zoteroModalResults');
 
+    this.inputEl.setAttribute('spellcheck', 'false');
+
     this.loadingEl = this.resultContainerEl.parentElement.createEl('div', {
       cls: 'zoteroModalLoading',
     });
