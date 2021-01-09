@@ -95,6 +95,7 @@ export abstract class Entry {
   abstract authorString?: string;
   abstract containerTitle?: string;
   abstract DOI?: string;
+  abstract files?: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract issuedDate?: Date;
   abstract page?: string;
@@ -131,6 +132,8 @@ export class EntryCSLAdapter extends Entry {
   constructor(private data: EntryDataCSL) {
     super();
   }
+
+  files: string[] = null;
 
   get id() {
     return this.data.id;
@@ -253,6 +256,20 @@ export class EntryBibLaTeXAdapter extends Entry {
   }
   get type() {
     return this.data.type;
+  }
+
+  get files(): string[] {
+    // For some reason the bibtex parser doesn't reliably parse file list to
+    // array ; so we'll do it manually / redundantly
+    let ret: string[] = [];
+    if (this.data.fields.file) {
+      ret = ret.concat(this.data.fields.file.flatMap((x) => x.split(';')));
+    }
+    if (this.data.fields.files) {
+      ret = ret.concat(this.data.fields.files.flatMap((x) => x.split(';')));
+    }
+
+    return ret;
   }
 
   get authorString() {

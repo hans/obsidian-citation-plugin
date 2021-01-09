@@ -187,6 +187,7 @@ export class OpenNoteModal extends SearchModal {
       { command: '↵', purpose: 'to open literature note' },
       { command: 'ctrl ↵', purpose: 'to open literature note in a new pane' },
       { command: 'tab', purpose: 'open in Zotero' },
+      { command: 'shift tab', purpose: 'open PDF' },
       { command: 'esc', purpose: 'to dismiss' },
     ]);
   }
@@ -197,7 +198,18 @@ export class OpenNoteModal extends SearchModal {
         evt instanceof KeyboardEvent && (evt as KeyboardEvent).ctrlKey;
       this.plugin.openLiteratureNote(item.id, newPane);
     } else if (evt.key == 'Tab') {
-      open(item.zoteroSelectURI);
+      if (evt.shiftKey && item.files.length > 0) {
+        const pdfPaths = item.files.filter((path) =>
+          path.toLowerCase().endsWith('pdf'),
+        );
+        if (pdfPaths.length == 0) {
+          // TODO show error
+        } else {
+          open(pdfPaths[0]);
+        }
+      } else {
+        open(item.zoteroSelectURI);
+      }
     }
   }
 }
