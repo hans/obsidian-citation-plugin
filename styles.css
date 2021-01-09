@@ -37,6 +37,11 @@ ul#citationTemplateVariables .text-monospace {
   font-family: monospace;
 }
 
+.zoteroModalResults .suggestion-item {
+  height: fit-content;
+  line-height: 1.5rem;
+}
+
 .zoteroTitle {
   font-size: 14px;
   display: block;
