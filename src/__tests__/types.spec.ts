@@ -13,8 +13,6 @@ import {
   loadEntries,
 } from '../types';
 
-let entries: EntryData[];
-
 const expectedRender: Record<string, string>[] = [
   {
     citekey: 'abnar2019blackbox',
@@ -87,27 +85,33 @@ function matchLibraryRender(
   expect(actual).toMatchObject(expected);
 }
 
+function loadBibLaTeXEntries(filename: string): EntryDataBibLaTeX[] {
+  const biblatexPath = path.join(__dirname, filename);
+  const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
+  return loadEntries(biblatex, 'biblatex') as EntryDataBibLaTeX[];
+}
+
+function loadBibLaTeXLibrary(entries: EntryDataBibLaTeX[]): Library {
+  return new Library(
+    Object.fromEntries(
+      entries.map((e: EntryDataBibLaTeX) => [
+        e.key,
+        new EntryBibLaTeXAdapter(e),
+      ]),
+    ),
+  );
+}
+
 describe('biblatex library', () => {
+  let entries: EntryDataBibLaTeX[];
   beforeEach(() => {
-    const biblatexPath = path.join(__dirname, 'library.bib');
-    const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
-    entries = loadEntries(biblatex, 'biblatex');
+    entries = loadBibLaTeXEntries('library.bib');
   });
+  const loadLibrary = () => loadBibLaTeXLibrary(entries);
 
   test('loads', () => {
     expect(entries.length).toBe(4);
   });
-
-  function loadLibrary(): Library {
-    return new Library(
-      Object.fromEntries(
-        entries.map((e: EntryDataBibLaTeX) => [
-          e.key,
-          new EntryBibLaTeXAdapter(e),
-        ]),
-      ),
-    );
-  }
 
   test('can support library', () => {
     const library = loadLibrary();
@@ -125,11 +129,29 @@ describe('biblatex library', () => {
   });
 });
 
+describe('biblatex regression tests', () => {
+  test('regression 7f9aefe (parser error handling)', () => {
+    const load = () => {
+      const library = loadBibLaTeXLibrary(
+        loadBibLaTeXEntries('regression_7f9aefe.bib'),
+      );
+    };
+
+    // Make sure we log warning
+    const warnCallback = jest.fn();
+    jest.spyOn(global.console, 'warn').mockImplementation(warnCallback);
+
+    expect(load).not.toThrowError();
+    expect(warnCallback.mock.calls.length).toBe(1);
+  });
+});
+
 describe('csl library', () => {
+  let entries: EntryDataCSL[];
   beforeEach(() => {
     const cslPath = path.join(__dirname, 'library.json');
     const csl = fs.readFileSync(cslPath, 'utf-8');
-    entries = loadEntries(csl, 'csl-json');
+    entries = loadEntries(csl, 'csl-json') as EntryDataCSL[];
   });
 
   test('loads', () => {
