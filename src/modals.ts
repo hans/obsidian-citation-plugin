@@ -102,6 +102,7 @@ class SearchModal extends FuzzySuggestModal<Entry> {
   renderSuggestion(match: FuzzyMatch<Entry>, el: HTMLElement): void {
     el.empty();
     const entry = match.item;
+    const entryTitle = entry.title || '';
 
     const container = el.createEl('div', { cls: 'zoteroResult' });
     const titleEl = container.createEl('span', {
@@ -120,7 +121,7 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     // Compute offsets of each rendered element's content within the string
     // returned by `getItemText`.
     const allMatches = match.match.matches;
-    const authorStringOffset = 1 + entry.title.length;
+    const authorStringOffset = 1 + entryTitle.length;
 
     // Filter a match list to contain only the relevant matches for a given
     // substring, and with match indices shifted relative to the start of that
@@ -147,8 +148,8 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     // Now highlight matched strings within each element
     renderMatches(
       titleEl,
-      entry.title,
-      shiftMatches(allMatches, 0, entry.title.length),
+      entryTitle,
+      shiftMatches(allMatches, 0, entryTitle.length),
     );
     if (entry.authorString) {
       renderMatches(
