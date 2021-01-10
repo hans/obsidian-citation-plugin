@@ -70,7 +70,11 @@ export function loadEntries(
   if (databaseType == 'csl-json') {
     libraryArray = JSON.parse(databaseRaw);
   } else if (databaseType == 'biblatex') {
-    const options: BibTeXParser.ParserOptions = {};
+    const options: BibTeXParser.ParserOptions = {
+      errorHandler: (err) => {
+        console.warn('Citation plugin: error loading BibLaTeX entry:', err);
+      },
+    };
     const parsed = BibTeXParser.parse(
       databaseRaw,
       options,
