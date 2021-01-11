@@ -10,6 +10,8 @@ import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
 
+import { TemplateDelegate as Template } from 'handlebars';
+
 import {
   InsertCitationModal,
   InsertNoteLinkModal,
@@ -27,7 +29,6 @@ import {
 } from './types';
 import {
   DISALLOWED_FILENAME_CHARACTERS_RE,
-  formatTemplate,
   Notifier,
   WorkerManager,
   WorkerManagerBlocked,
@@ -225,9 +226,26 @@ export default class CitationPlugin extends Plugin {
     return this.loadWorker.blocked;
   }
 
+  get literatureNoteTitleTemplate(): Template {
+    return Handlebars.compile(this.settings.literatureNoteTitleTemplate);
+  }
+
+  get literatureNoteContentTemplate(): Template {
+    return Handlebars.compile(this.settings.literatureNoteContentTemplate);
+  }
+
+  get markdownCitationTemplate(): Template {
+    return Handlebars.compile(this.settings.markdownCitationTemplate);
+  }
+
+  get alternativeMarkdownCitationTemplate(): Template {
+    return Handlebars.compile(
+      this.settings.alternativeMarkdownCitationTemplate,
+    );
+  }
+
   getTitleForCitekey(citekey: string): string {
-    const unsafeTitle = formatTemplate(
-      this.settings.literatureNoteTitleTemplate,
+    const unsafeTitle = this.literatureNoteTitleTemplate(
       this.library.getTemplateVariablesForCitekey(citekey),
     );
     return unsafeTitle.replace(DISALLOWED_FILENAME_CHARACTERS_RE, '_');
@@ -240,22 +258,19 @@ export default class CitationPlugin extends Plugin {
   }
 
   getInitialContentForCitekey(citekey: string): string {
-    return formatTemplate(
-      this.settings.literatureNoteContentTemplate,
+    return this.literatureNoteContentTemplate(
       this.library.getTemplateVariablesForCitekey(citekey),
     );
   }
 
   getMarkdownCitationForCitekey(citekey: string): string {
-    return formatTemplate(
-      this.settings.markdownCitationTemplate,
+    return this.markdownCitationTemplate(
       this.library.getTemplateVariablesForCitekey(citekey),
     );
   }
 
   getAlternativeMarkdownCitationForCitekey(citekey: string): string {
-    return formatTemplate(
-      this.settings.alternativeMarkdownCitationTemplate,
+    return this.alternativeMarkdownCitationTemplate(
       this.library.getTemplateVariablesForCitekey(citekey),
     );
   }

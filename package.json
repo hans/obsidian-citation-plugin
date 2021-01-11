@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@retorquere/bibtex-parser": "^3.2.30",
+    "handlebars": "^4.7.6",
     "open": "^7.3.0",
     "promise-worker": "^2.0.1"
   },

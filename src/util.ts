@@ -6,19 +6,6 @@ import { NoticeExt } from './obsidian-extensions';
 
 export const DISALLOWED_FILENAME_CHARACTERS_RE = /[*"\\/<>:|?]/g;
 
-export function formatTemplate(
-  template: string,
-  environment: { [key: string]: string },
-): string {
-  return template.replace(/{{([\w_]+)}}/g, function (match, key) {
-    if (key in environment) {
-      return environment[key];
-    }
-
-    return `(Unknown template variable ${key})`;
-  });
-}
-
 /**
  * Manages a category of notices to be displayed in the UI. Prevents multiple
  * notices being shown at the same time.

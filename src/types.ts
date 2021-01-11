@@ -37,9 +37,9 @@ export class Library {
    * For the given citekey, find the corresponding `Entry` and return a
    * collection of template variable assignments.
    */
-  getTemplateVariablesForCitekey(citekey: string): Record<string, string> {
+  getTemplateVariablesForCitekey(citekey: string): Record<string, any> {
     const entry: Entry = this.entries[citekey];
-    return {
+    const shortcuts = {
       citekey: citekey,
 
       abstract: entry.abstract,
@@ -52,6 +52,8 @@ export class Library {
       year: entry.year?.toString(),
       zoteroSelectURI: entry.zoteroSelectURI,
     };
+
+    return { entry: entry, ...shortcuts };
   }
 }
 

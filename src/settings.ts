@@ -6,6 +6,7 @@ import {
   PluginSettingTab,
   Setting,
 } from 'obsidian';
+
 import CitationPlugin from './main';
 import { IIndexable, DatabaseType, TEMPLATE_VARIABLES } from './types';
 
