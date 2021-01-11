@@ -53,7 +53,7 @@ export class Library {
       zoteroSelectURI: entry.zoteroSelectURI,
     };
 
-    return { entry: entry, ...shortcuts };
+    return { entry: entry.toJSON(), ...shortcuts };
   }
 }
 
@@ -114,6 +114,27 @@ export abstract class Entry {
 
   get zoteroSelectURI(): string {
     return `zotero://select/items/@${this.id}`;
+  }
+
+  toJSON(): Record<string, unknown> {
+    const jsonObj: Record<string, unknown> = Object.assign({}, this);
+
+    // add getter values
+    const proto = Object.getPrototypeOf(this);
+    Object.entries(Object.getOwnPropertyDescriptors(proto))
+      .filter(([key, descriptor]) => typeof descriptor.get == 'function')
+      .forEach(([key, descriptor]) => {
+        if (descriptor && key[0] !== '_') {
+          try {
+            const val = (this as IIndexable)[key];
+            jsonObj[key] = val;
+          } catch (error) {
+            return;
+          }
+        }
+      });
+
+    return jsonObj;
   }
 }
 

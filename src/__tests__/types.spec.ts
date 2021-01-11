@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import * as _ from 'lodash';
+import { compile as compileTemplate } from 'handlebars';
 
 import {
   Library,
@@ -91,6 +92,18 @@ function matchLibraryRender(
   expect(actual).toMatchObject(expected);
 }
 
+const renderAdvancedTemplate = (
+  loadLibrary: () => Library,
+  citekey: string,
+) => {
+  const library = loadLibrary();
+  const template =
+    '{{#each entry.author}}[[{{this.family}}, {{this.given}}]]{{#unless @last}}, {{/unless}}{{/each}}';
+  return compileTemplate(template)(
+    library.getTemplateVariablesForCitekey(citekey),
+  );
+};
+
 describe('biblatex library', () => {
   beforeEach(() => {
     const biblatexPath = path.join(__dirname, 'library.bib');
@@ -127,6 +140,11 @@ describe('biblatex library', () => {
 
     matchLibraryRender(templateVariables, expectedRender);
   });
+
+  test('advanced template render', () => {
+    const render = renderAdvancedTemplate(loadLibrary, 'aitchison2017you');
+    expect(render).toBe('[[Aitchison, Laurence]], [[Lengyel, Máté]]');
+  });
 });
 
 describe('csl library', () => {
@@ -161,5 +179,10 @@ describe('csl library', () => {
     });
 
     matchLibraryRender(templateVariables, expectedRender);
+  });
+
+  test('advanced template render', () => {
+    const render = renderAdvancedTemplate(loadLibrary, 'aitchison2017you');
+    expect(render).toBe('[[Aitchison, Laurence]], [[Lengyel, Máté]]');
   });
 });
