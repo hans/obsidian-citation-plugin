@@ -10,7 +10,10 @@ import { watch } from 'original-fs';
 import * as path from 'path';
 import * as CodeMirror from 'codemirror';
 
-import { TemplateDelegate as Template } from 'handlebars';
+import {
+  compile as compileTemplate,
+  TemplateDelegate as Template,
+} from 'handlebars';
 
 import {
   InsertCitationModal,
@@ -227,21 +230,19 @@ export default class CitationPlugin extends Plugin {
   }
 
   get literatureNoteTitleTemplate(): Template {
-    return Handlebars.compile(this.settings.literatureNoteTitleTemplate);
+    return compileTemplate(this.settings.literatureNoteTitleTemplate);
   }
 
   get literatureNoteContentTemplate(): Template {
-    return Handlebars.compile(this.settings.literatureNoteContentTemplate);
+    return compileTemplate(this.settings.literatureNoteContentTemplate);
   }
 
   get markdownCitationTemplate(): Template {
-    return Handlebars.compile(this.settings.markdownCitationTemplate);
+    return compileTemplate(this.settings.markdownCitationTemplate);
   }
 
   get alternativeMarkdownCitationTemplate(): Template {
-    return Handlebars.compile(
-      this.settings.alternativeMarkdownCitationTemplate,
-    );
+    return compileTemplate(this.settings.alternativeMarkdownCitationTemplate);
   }
 
   getTitleForCitekey(citekey: string): string {
