@@ -1,0 +1,179 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>obsidian-citation-plugin</title>
+	<meta name="description" content="Documentation for obsidian-citation-plugin">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">obsidian-citation-plugin</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>Project obsidian-citation-plugin</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#obsidian-citation-plugin" id="obsidian-citation-plugin" style="color: inherit; text-decoration: none;">
+					<h1>obsidian-citation-plugin</h1>
+				</a>
+				<p>This plugin for <a href="https://obsidian.md">Obsidian</a> integrates your academic reference manager with the Obsidian editing experience.</p>
+				<p><img src="screenshot.png" alt=""></p>
+				<p>The plugin supports reading bibliographies in <a href="http://www.bibtex.org/">BibTeX / BibLaTeX <code>.bib</code> format</a> and <a href="https://github.com/citation-style-language/schema#csl-json-schema">CSL-JSON format</a>.</p>
+				<a href="#setup" id="setup" style="color: inherit; text-decoration: none;">
+					<h2>Setup</h2>
+				</a>
+				<p>You can install this plugin via the Obsidian &quot;Third-party plugin interface.&quot; It requires Obsidian 0.9.20 or higher.</p>
+				<p>Once the plugin is installed, you must provide it with a bibliography file:</p>
+				<ul>
+					<li>If you use <strong>Zotero</strong> with <a href="https://retorque.re/zotero-better-bibtex/">Better BibTeX</a>:<ul>
+							<li>Select a collection in Zotero&#39;s left sidebar that you want to export.</li>
+							<li>Click <code>File</code> -&gt; <code>Export library ...</code>. Select <code>Better BibLaTeX</code> or <code>Better CSL JSON</code> as the format. (We recommend using the BibLaTeX export unless you experience performance issues. The BibLaTeX format includes more information that you can reference from Obsidian, such as associated PDF attachments, but loads more slowly than the JSON export.)</li>
+							<li>You can optionally choose &quot;Keep updated&quot; to automatically re-export the collection -- this is recommended!</li>
+						</ul>
+					</li>
+					<li>If you use other reference managers, check their documentation for BibLaTeX or CSL-JSON export support. We plan to officially support other managers in the future.</li>
+				</ul>
+				<p>Now open the Obsidian preferences and view the &quot;Citations&quot; tab. Paste the path to the exported file (<code>.bib</code> or <code>.json</code>, depending on the format you chose) in the text field labeled &quot;Citation export path.&quot; After closing the settings dialog, you should now be able to search your references from within Obsidian!</p>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<p>The plugin offers three simple features at the moment:</p>
+				<ol>
+					<li><strong>Open literature note</strong> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>): automatically create or open a literature note for a particular reference. The title, folder, and initial content of the note can be configured in the plugin settings.</li>
+					<li><strong>Insert literature note reference</strong> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>): insert a link to the literature note corresponding to a particular reference.</li>
+					<li><strong>Insert Markdown citation</strong> (no hotkey by default): insert a <a href="https://pandoc.org/MANUAL.html#extension-citations">Pandoc-style citation</a> for a particular reference. (The exact format of the citation can be configured in the plugin settings.)</li>
+				</ol>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h2>License</h2>
+				</a>
+				<p>MIT License.</p>
+				<a href="#contributors" id="contributors" style="color: inherit; text-decoration: none;">
+					<h2>Contributors</h2>
+				</a>
+				<ul>
+					<li>Jon Gauthier (<a href="https://github.com/hans">hans</a>)</li>
+					<li><a href="https://github.com/raineszm">raineszm</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="modules.html">Exports</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="classes/entry.html" class="tsd-kind-icon">Entry</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/entrybiblatexadapter.html" class="tsd-kind-icon">Entry<wbr>Bib<wbr>LaTeXAdapter</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/entrycsladapter.html" class="tsd-kind-icon">EntryCSLAdapter</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/library.html" class="tsd-kind-icon">Library</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/author.html" class="tsd-kind-icon">Author</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/entrydatabiblatex.html" class="tsd-kind-icon">Entry<wbr>Data<wbr>Bib<wbr>LaTeX</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/entrydatacsl.html" class="tsd-kind-icon">Entry<wbr>DataCSL</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/iindexable.html" class="tsd-kind-icon">IIndexable</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="modules.html#databasetype" class="tsd-kind-icon">Database<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="modules.html#entrydata" class="tsd-kind-icon">Entry<wbr>Data</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="modules.html#template_variables" class="tsd-kind-icon">TEMPLATE_<wbr>VARIABLES</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#loadentries" class="tsd-kind-icon">load<wbr>Entries</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

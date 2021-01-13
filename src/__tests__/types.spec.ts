@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import * as _ from 'lodash';
+import { compile as compileTemplate } from 'handlebars';
 
 import {
   Library,
@@ -12,6 +13,8 @@ import {
   EntryCSLAdapter,
   loadEntries,
 } from '../types';
+
+let entries: EntryData[];
 
 const expectedRender: Record<string, string>[] = [
   {
@@ -71,47 +74,57 @@ const expectedRender: Record<string, string>[] = [
 ];
 
 // Test whether loaded and expected libraries are the same, ignoring casing and
-// hyphenation
+// hyphenation and the `entry` field
 function matchLibraryRender(
   actual: Record<string, string>[],
   expected: Record<string, string>[],
 ): void {
-  const transform = (val: string) =>
-    val?.toLowerCase().replace(/[\u2012-\u2014]/g, '-');
+  const transform = (dict: Record<string, string>): Record<string, string> => {
+    delete dict.entry;
+    return _.mapValues(dict, (val: string) =>
+      val?.toLowerCase().replace(/[\u2012-\u2014]/g, '-'),
+    );
+  };
 
-  actual = actual.map((r) => _.mapValues(r, transform));
-  expected = expected.map((r) => _.mapValues(r, transform));
+  actual = actual.map(transform);
+  expected = expected.map(transform);
 
   expect(actual).toMatchObject(expected);
 }
 
-function loadBibLaTeXEntries(filename: string): EntryDataBibLaTeX[] {
-  const biblatexPath = path.join(__dirname, filename);
-  const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
-  return loadEntries(biblatex, 'biblatex') as EntryDataBibLaTeX[];
-}
-
-function loadBibLaTeXLibrary(entries: EntryDataBibLaTeX[]): Library {
-  return new Library(
-    Object.fromEntries(
-      entries.map((e: EntryDataBibLaTeX) => [
-        e.key,
-        new EntryBibLaTeXAdapter(e),
-      ]),
-    ),
+const renderAdvancedTemplate = (
+  loadLibrary: () => Library,
+  citekey: string,
+) => {
+  const library = loadLibrary();
+  const template =
+    '{{#each entry.author}}[[{{this.family}}, {{this.given}}]]{{#unless @last}}, {{/unless}}{{/each}}';
+  return compileTemplate(template)(
+    library.getTemplateVariablesForCitekey(citekey),
   );
-}
+};
 
 describe('biblatex library', () => {
-  let entries: EntryDataBibLaTeX[];
   beforeEach(() => {
-    entries = loadBibLaTeXEntries('library.bib');
+    const biblatexPath = path.join(__dirname, 'library.bib');
+    const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
+    entries = loadEntries(biblatex, 'biblatex');
   });
-  const loadLibrary = () => loadBibLaTeXLibrary(entries);
 
   test('loads', () => {
     expect(entries.length).toBe(4);
   });
+
+  function loadLibrary(): Library {
+    return new Library(
+      Object.fromEntries(
+        entries.map((e: EntryDataBibLaTeX) => [
+          e.key,
+          new EntryBibLaTeXAdapter(e),
+        ]),
+      ),
+    );
+  }
 
   test('can support library', () => {
     const library = loadLibrary();
@@ -127,31 +140,18 @@ describe('biblatex library', () => {
 
     matchLibraryRender(templateVariables, expectedRender);
   });
-});
 
-describe('biblatex regression tests', () => {
-  test('regression 7f9aefe (parser error handling)', () => {
-    const load = () => {
-      const library = loadBibLaTeXLibrary(
-        loadBibLaTeXEntries('regression_7f9aefe.bib'),
-      );
-    };
-
-    // Make sure we log warning
-    const warnCallback = jest.fn();
-    jest.spyOn(global.console, 'warn').mockImplementation(warnCallback);
-
-    expect(load).not.toThrowError();
-    expect(warnCallback.mock.calls.length).toBe(1);
+  test('advanced template render', () => {
+    const render = renderAdvancedTemplate(loadLibrary, 'aitchison2017you');
+    expect(render).toBe('[[Aitchison, Laurence]], [[Lengyel, Máté]]');
   });
 });
 
 describe('csl library', () => {
-  let entries: EntryDataCSL[];
   beforeEach(() => {
     const cslPath = path.join(__dirname, 'library.json');
     const csl = fs.readFileSync(cslPath, 'utf-8');
-    entries = loadEntries(csl, 'csl-json') as EntryDataCSL[];
+    entries = loadEntries(csl, 'csl-json');
   });
 
   test('loads', () => {
@@ -179,5 +179,10 @@ describe('csl library', () => {
     });
 
     matchLibraryRender(templateVariables, expectedRender);
+  });
+
+  test('advanced template render', () => {
+    const render = renderAdvancedTemplate(loadLibrary, 'aitchison2017you');
+    expect(render).toBe('[[Aitchison, Laurence]], [[Lengyel, Máté]]');
   });
 });
