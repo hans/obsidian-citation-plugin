@@ -153,13 +153,26 @@ export class CitationSettingTab extends PluginSettingTab {
       );
 
     containerEl.createEl('h3', { text: 'Template settings' });
-    containerEl.createEl('p', {
-      text:
-        'The following settings determine how the notes and links created by ' +
-        'the plugin will be rendered. You may specify a custom template for ' +
-        'each type of content. Templates are interpreted using Handlebars ' +
-        'syntax. You can make reference to the following variables:',
-    });
+    const templateInstructionsEl = containerEl.createEl('p');
+    templateInstructionsEl.append(
+      createSpan({
+        text:
+          'The following settings determine how the notes and links created by ' +
+          'the plugin will be rendered. You may specify a custom template for ' +
+          'each type of content. Templates are interpreted using ',
+      }),
+    );
+    templateInstructionsEl.append(
+      createEl('a', {
+        text: 'Handlebars',
+        href: 'https://handlebarsjs.com/guide/expressions.html',
+      }),
+    );
+    templateInstructionsEl.append(
+      createSpan({
+        text: ' syntax. You can make reference to the following variables:',
+      }),
+    );
 
     const templateVariableUl = containerEl.createEl('ul', {
       attr: { id: 'citationTemplateVariables' },
@@ -178,12 +191,22 @@ export class CitationSettingTab extends PluginSettingTab {
       });
     });
 
-    containerEl.createEl('p', {
-      text:
-        'Advanced users may also refer to the {{entry}} variable, which ' +
-        'contains the full object representation of the reference. See the ' +
-        'plugin documentation for information on the structure of entry objects.',
-    });
+    const templateEntryInstructionsEl = containerEl.createEl('p');
+    templateEntryInstructionsEl.append(
+      createSpan({ text: 'Advanced users may also refer to the ' }),
+      createSpan({ text: '{{entry}}', cls: 'text-monospace' }),
+      createSpan({
+        text:
+          ' variable, which contains the full object representation of the ' +
+          'reference as used internally by the plugin. See the ',
+      }),
+      createEl('a', {
+        text: 'plugin documentation',
+        href:
+          'https://github.com/hans/obsidian-citation-plugin/blob/master/docs/classes/entry.html',
+      }),
+      createSpan({ text: " for information on this object's structure." }),
+    );
 
     containerEl.createEl('h3', { text: 'Literature note templates' });
 
