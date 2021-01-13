@@ -152,10 +152,13 @@ export class CitationSettingTab extends PluginSettingTab {
         'Save literature note files in this folder within your vault. If empty, notes will be stored in the root directory of the vault.',
       );
 
-    containerEl.createEl('h3', { text: 'Literature note settings' });
+    containerEl.createEl('h3', { text: 'Template settings' });
     containerEl.createEl('p', {
       text:
-        'The following variables can be used in the title and content templates:',
+        'The following settings determine how the notes and links created by ' +
+        'the plugin will be rendered. You may specify a custom template for ' +
+        'each type of content. Templates are interpreted using Handlebars ' +
+        'syntax. You can make reference to the following variables:',
     });
 
     const templateVariableUl = containerEl.createEl('ul', {
@@ -175,6 +178,15 @@ export class CitationSettingTab extends PluginSettingTab {
       });
     });
 
+    containerEl.createEl('p', {
+      text:
+        'Advanced users may also refer to the {{entry}} variable, which ' +
+        'contains the full object representation of the reference. See the ' +
+        'plugin documentation for information on the structure of entry objects.',
+    });
+
+    containerEl.createEl('h3', { text: 'Literature note templates' });
+
     new Setting(containerEl)
       .setName('Literature note title template')
       .addText((input) =>
@@ -187,7 +199,7 @@ export class CitationSettingTab extends PluginSettingTab {
         this.buildValueInput(input, 'literatureNoteContentTemplate'),
       );
 
-    containerEl.createEl('h3', { text: 'Markdown citation settings' });
+    containerEl.createEl('h3', { text: 'Markdown citation templates' });
     containerEl.createEl('p', {
       text:
         'You can insert Pandoc-style Markdown citations rather than literature notes by using the "Insert Markdown citation" command. The below options allow customization of the Markdown citation format.',

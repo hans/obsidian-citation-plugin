@@ -92,18 +92,48 @@ export interface Author {
   family?: string;
 }
 
+/**
+ * An `Entry` represents a single reference in a reference database.
+ * Each entry has a unique identifier, known in most reference managers as its
+ * "citekey."
+ */
 export abstract class Entry {
+  /**
+   * Unique identifier for the entry (also the citekey).
+   */
   abstract id: string;
+
   abstract type: string;
 
   abstract abstract?: string;
   abstract author?: Author[];
+
+  /**
+   * A comma-separated list of authors, each of the format `<firstname> <lastname>`.
+   */
   abstract authorString?: string;
+
+  /**
+   * The name of the container for this reference -- in the case of a book
+   * chapter reference, the name of the book; in the case of a journal article,
+   * the name of the journal.
+   */
   abstract containerTitle?: string;
+
   abstract DOI?: string;
   abstract files?: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+  /**
+   * The date of issue. Many references do not contain information about month
+   * and day of issue; in this case, the `issuedDate` will contain dummy minimum
+   * values for those elements. (A reference which is only encoded as being
+   * issued in 2001 is represented here with a date 2001-01-01 00:00:00 UTC.)
+   */
   abstract issuedDate?: Date;
+
+  /**
+   * Page or page range of the reference.
+   */
   abstract page?: string;
   abstract title?: string;
   abstract URL?: string;
@@ -112,6 +142,9 @@ export abstract class Entry {
     return this.issuedDate?.getUTCFullYear();
   }
 
+  /**
+   * A URI which will open the relevant entry in the Zotero client.
+   */
   get zoteroSelectURI(): string {
     return `zotero://select/items/@${this.id}`;
   }

@@ -2,7 +2,7 @@
 
 This plugin for [Obsidian](https://obsidian.md) integrates your academic reference manager with the Obsidian editing experience.
 
-![](docs/screenshot.png)
+![](screenshot.png)
 
 The plugin supports reading bibliographies in [BibTeX / BibLaTeX `.bib` format][4] and [CSL-JSON format][1].
 
