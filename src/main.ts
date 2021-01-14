@@ -18,6 +18,7 @@ import {
 import {
   InsertCitationModal,
   InsertNoteLinkModal,
+  InsertNoteContentModal,
   OpenNoteModal,
 } from './modals';
 
@@ -124,6 +125,15 @@ export default class CitationPlugin extends Plugin {
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'e' }],
       callback: () => {
         const modal = new InsertNoteLinkModal(this.app, this);
+        modal.open();
+      },
+    });
+
+    this.addCommand({
+      id: 'insert-literature-note-content',
+      name: 'Insert literature note content in the current pane',
+      callback: () => {
+        const modal = new InsertNoteContentModal(this.app, this);
         modal.open();
       },
     });
@@ -306,15 +316,21 @@ export default class CitationPlugin extends Plugin {
   async insertLiteratureNoteLink(citekey: string): Promise<void> {
     this.getOrCreateLiteratureNoteFile(citekey)
       .then(() => {
-        // TODO what is the API for this?
-        console.log(this.app.workspace.activeLeaf);
-
         const title = this.getTitleForCitekey(citekey),
           linkText = `[[${title}]]`;
         // console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
         this.editor.replaceRange(linkText, this.editor.getCursor());
       })
       .catch(console.error);
+  }
+
+  /**
+   * Format literature note content for a given reference and insert in the
+   * currently active pane.
+   */
+  async insertLiteratureNoteContent(citekey: string): Promise<void> {
+    const content = this.getInitialContentForCitekey(citekey);
+    this.editor.replaceRange(content, this.editor.getCursor());
   }
 
   async insertMarkdownCitation(

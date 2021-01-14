@@ -232,6 +232,26 @@ export class InsertNoteLinkModal extends SearchModal {
   }
 }
 
+export class InsertNoteContentModal extends SearchModal {
+  constructor(app: App, plugin: CitationPlugin) {
+    super(app, plugin);
+
+    this.setInstructions([
+      { command: '↑↓', purpose: 'to navigate' },
+      {
+        command: '↵',
+        purpose: 'to insert literature note content in active pane',
+      },
+      { command: 'esc', purpose: 'to dismiss' },
+    ]);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onChooseItem(item: Entry, evt: unknown): void {
+    this.plugin.insertLiteratureNoteContent(item.id).catch(console.error);
+  }
+}
+
 export class InsertCitationModal extends SearchModal {
   constructor(app: App, plugin: CitationPlugin) {
     super(app, plugin);
