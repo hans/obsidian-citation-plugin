@@ -101,27 +101,27 @@ export abstract class Entry {
   /**
    * Unique identifier for the entry (also the citekey).
    */
-  abstract id: string;
+  public abstract id: string;
 
-  abstract type: string;
+  public abstract type: string;
 
-  abstract abstract?: string;
-  abstract author?: Author[];
+  public abstract abstract?: string;
+  public abstract author?: Author[];
 
   /**
    * A comma-separated list of authors, each of the format `<firstname> <lastname>`.
    */
-  abstract authorString?: string;
+  public abstract authorString?: string;
 
   /**
    * The name of the container for this reference -- in the case of a book
    * chapter reference, the name of the book; in the case of a journal article,
    * the name of the journal.
    */
-  abstract containerTitle?: string;
+  public abstract containerTitle?: string;
 
-  abstract DOI?: string;
-  abstract files?: string[];
+  public abstract DOI?: string;
+  public abstract files?: string[];
 
   /**
    * The date of issue. Many references do not contain information about month
@@ -129,23 +129,26 @@ export abstract class Entry {
    * values for those elements. (A reference which is only encoded as being
    * issued in 2001 is represented here with a date 2001-01-01 00:00:00 UTC.)
    */
-  abstract issuedDate?: Date;
+  public abstract issuedDate?: Date;
 
   /**
    * Page or page range of the reference.
    */
-  abstract page?: string;
-  abstract title?: string;
-  abstract URL?: string;
+  public abstract page?: string;
+  public abstract title?: string;
+  public abstract URL?: string;
 
-  get year(): number {
-    return this.issuedDate?.getUTCFullYear();
+  protected _year?: string;
+  public get year(): number {
+    return this._year
+      ? parseInt(this._year)
+      : this.issuedDate?.getUTCFullYear();
   }
 
   /**
    * A URI which will open the relevant entry in the Zotero client.
    */
-  get zoteroSelectURI(): string {
+  public get zoteroSelectURI(): string {
     return `zotero://select/items/@${this.id}`;
   }
 
@@ -155,7 +158,7 @@ export abstract class Entry {
     // add getter values
     const proto = Object.getPrototypeOf(this);
     Object.entries(Object.getOwnPropertyDescriptors(proto))
-      .filter(([key, descriptor]) => typeof descriptor.get == 'function')
+      .filter(([, descriptor]) => typeof descriptor.get == 'function')
       .forEach(([key, descriptor]) => {
         if (descriptor && key[0] !== '_') {
           try {
@@ -256,12 +259,14 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   date: 'issued',
   doi: 'DOI',
   eventtitle: 'event',
+  journal: '_containerTitle',
   journaltitle: '_containerTitle',
   pages: 'page',
   shortjournal: 'containerTitleShort',
   title: 'title',
   shorttitle: 'titleShort',
   url: 'URL',
+  year: '_year',
 };
 
 // BibLaTeX parser returns arrays of property values (allowing for repeated
@@ -279,6 +284,7 @@ const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
   'title',
   'shorttitle',
   'url',
+  '_year',
 ];
 
 export class EntryBibLaTeXAdapter extends Entry {
@@ -292,6 +298,7 @@ export class EntryBibLaTeXAdapter extends Entry {
   title?: string;
   titleShort?: string;
   URL?: string;
+  _year?: string;
 
   constructor(private data: EntryDataBibLaTeX) {
     super();

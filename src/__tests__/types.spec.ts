@@ -6,6 +6,7 @@ import { compile as compileTemplate } from 'handlebars';
 
 import {
   Library,
+  Entry,
   EntryData,
   EntryDataBibLaTeX,
   EntryDataCSL,
@@ -14,9 +15,21 @@ import {
   loadEntries,
 } from '../types';
 
-let entries: EntryData[];
-
 const expectedRender: Record<string, string>[] = [
+  {
+    citekey: 'Weiner2003',
+    abstract:
+      'Biomineralization links soft organic tissues, which are compositionally akin to the atmosphere and oceans, with the hard materials of the solid Earth. It provides organisms with skeletons and shells while they are alive, and when they die these are deposited as sediment in environments from river plains to the deep ocean floor. It is also these hard, resistant products of life which are mainly responsible for the Earths fossil record. Consequently, biomineralization involves biologists, chemists, and geologists in interdisciplinary studies at one of the interfaces between Earth and life.',
+    authorString: 'S. Weiner',
+    containerTitle: 'Rev. Mineral. Geochemistry',
+    DOI: '10.2113/0540001',
+    page: '1-29',
+    title:
+      'An Overview of Biomineralization Processes and the Problem of the Vital Effect',
+    URL: 'http://rimg.geoscienceworld.org/cgi/doi/10.2113/0540001',
+    year: '2003',
+    zoteroSelectURI: 'zotero://select/items/@Weiner2003',
+  },
   {
     citekey: 'abnar2019blackbox',
     abstract:
@@ -81,8 +94,11 @@ function matchLibraryRender(
 ): void {
   const transform = (dict: Record<string, string>): Record<string, string> => {
     delete dict.entry;
-    return _.mapValues(dict, (val: string) =>
-      val?.toLowerCase().replace(/[\u2012-\u2014]/g, '-'),
+    return _.mapValues(dict, (val: unknown) =>
+      val
+        ?.toString()
+        .toLowerCase()
+        .replace(/[\u2012-\u2014]/g, '-'),
     );
   };
 
@@ -105,14 +121,15 @@ const renderAdvancedTemplate = (
 };
 
 describe('biblatex library', () => {
+  let entries: EntryDataBibLaTeX[];
   beforeEach(() => {
     const biblatexPath = path.join(__dirname, 'library.bib');
     const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
-    entries = loadEntries(biblatex, 'biblatex');
+    entries = loadEntries(biblatex, 'biblatex') as EntryDataBibLaTeX[];
   });
 
   test('loads', () => {
-    expect(entries.length).toBe(4);
+    expect(entries.length).toBe(5);
   });
 
   function loadLibrary(): Library {
@@ -122,7 +139,7 @@ describe('biblatex library', () => {
           e.key,
           new EntryBibLaTeXAdapter(e),
         ]),
-      ),
+      ) as Record<string, Entry>,
     );
   }
 
@@ -148,14 +165,15 @@ describe('biblatex library', () => {
 });
 
 describe('csl library', () => {
+  let entries: EntryDataCSL[];
   beforeEach(() => {
     const cslPath = path.join(__dirname, 'library.json');
     const csl = fs.readFileSync(cslPath, 'utf-8');
-    entries = loadEntries(csl, 'csl-json');
+    entries = loadEntries(csl, 'csl-json') as EntryDataCSL[];
   });
 
   test('loads', () => {
-    expect(entries.length).toBe(4);
+    expect(entries.length).toBe(5);
   });
 
   function loadLibrary(): Library {
