@@ -202,8 +202,7 @@ export class CitationSettingTab extends PluginSettingTab {
       }),
       createEl('a', {
         text: 'plugin documentation',
-        href:
-          'https://github.com/hans/obsidian-citation-plugin/blob/master/docs/classes/entry.html',
+        href: 'http://www.foldl.me/obsidian-citation-plugin/classes/entry.html',
       }),
       createSpan({ text: " for information on this object's structure." }),
     );
