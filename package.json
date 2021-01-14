@@ -17,6 +17,7 @@
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-replace": "^2.3.4",
     "@rollup/plugin-typescript": "^6.0.0",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.167",
@@ -42,6 +43,7 @@
   "dependencies": {
     "@retorquere/bibtex-parser": "^3.2.30",
     "handlebars": "^4.7.6",
+    "chokidar": "^3.5.0",
     "open": "^7.3.0",
     "promise-worker": "^2.0.1"
   },

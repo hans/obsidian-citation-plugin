@@ -6,8 +6,8 @@ import {
   Plugin,
   TFile,
 } from 'obsidian';
-import { watch } from 'original-fs';
 import * as path from 'path';
+import * as chokidar from 'chokidar';
 import * as CodeMirror from 'codemirror';
 
 import {
@@ -99,9 +99,21 @@ export default class CitationPlugin extends Plugin {
 
       // Set up a watcher to refresh whenever the export is updated
       try {
-        watch(this.settings.citationExportPath, () => {
-          this.loadLibrary();
-        });
+        // Wait until files are finished being written before going ahead with
+        // the refresh -- here, we request that `change` events be accumulated
+        // until nothing shows up for 500 ms
+        // TODO magic number
+        const watchOptions = {
+          awaitWriteFinish: {
+            stabilityThreshold: 500,
+          },
+        };
+
+        chokidar
+          .watch(this.settings.citationExportPath, watchOptions)
+          .on('change', () => {
+            this.loadLibrary();
+          });
       } catch {
         this.loadErrorNotifier.show();
       }
