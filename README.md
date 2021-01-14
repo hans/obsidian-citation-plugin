@@ -22,7 +22,7 @@ Now open the Obsidian preferences and view the "Citations" tab. Paste the path t
 
 ## Usage
 
-The plugin offers three simple features at the moment:
+The plugin offers four simple features at the moment:
 
 1. **Open literature note** (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>): automatically create or open a literature note for a particular reference. The title, folder, and initial content of the note can be configured in the plugin settings.
 2. **Insert literature note reference** (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>): insert a link to the literature note corresponding to a particular reference.
