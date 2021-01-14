@@ -2,6 +2,7 @@ import {
   App,
   FuzzyMatch,
   FuzzySuggestModal,
+  Notice,
   renderMatches,
   SearchMatches,
   SearchMatchPart,
@@ -199,12 +200,13 @@ export class OpenNoteModal extends SearchModal {
         evt instanceof KeyboardEvent && (evt as KeyboardEvent).ctrlKey;
       this.plugin.openLiteratureNote(item.id, newPane);
     } else if (evt.key == 'Tab') {
-      if (evt.shiftKey && item.files.length > 0) {
-        const pdfPaths = item.files.filter((path) =>
+      if (evt.shiftKey) {
+        const files = item.files || [];
+        const pdfPaths = files.filter((path) =>
           path.toLowerCase().endsWith('pdf'),
         );
         if (pdfPaths.length == 0) {
-          // TODO show error
+          new Notice('This reference has no associated PDF files.');
         } else {
           open(`file://${pdfPaths[0]}`);
         }
