@@ -206,7 +206,7 @@ export class OpenNoteModal extends SearchModal {
         if (pdfPaths.length == 0) {
           // TODO show error
         } else {
-          open(pdfPaths[0]);
+          open(`file://${pdfPaths[0]}`);
         }
       } else {
         open(item.zoteroSelectURI);
