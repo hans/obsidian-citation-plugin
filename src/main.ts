@@ -298,19 +298,32 @@ export default class CitationPlugin extends Plugin {
     );
   }
 
+  /**
+   * Run a case-insensitive search for the literature note file corresponding to
+   * the given citekey. If no corresponding file is found, create one.
+   */
   async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {
     const path = this.getPathForCitekey(citekey);
-    let file = this.app.vault.getAbstractFileByPath(normalizePath(path));
+    const normalizedPath = normalizePath(path);
 
+    let file = this.app.vault.getAbstractFileByPath(normalizedPath);
     if (file == null) {
-      try {
-        file = await this.app.vault.create(
-          path,
-          this.getInitialContentForCitekey(citekey),
-        );
-      } catch (exc) {
-        this.literatureNoteErrorNotifier.show();
-        throw exc;
+      // First try a case-insensitive lookup.
+      const matches = this.app.vault
+        .getMarkdownFiles()
+        .filter((f) => f.path.toLowerCase() == normalizedPath.toLowerCase());
+      if (matches.length > 0) {
+        file = matches[0];
+      } else {
+        try {
+          file = await this.app.vault.create(
+            path,
+            this.getInitialContentForCitekey(citekey),
+          );
+        } catch (exc) {
+          this.literatureNoteErrorNotifier.show();
+          throw exc;
+        }
       }
     }
 
