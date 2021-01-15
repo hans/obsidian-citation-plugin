@@ -1,7 +1,7 @@
 import * as BibTeXParser from '@retorquere/bibtex-parser';
-import { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
+import type { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
 // Also make EntryDataBibLaTeX available to other modules
-export { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
+export type { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
 
 // Trick: allow string indexing onto object properties
 export interface IIndexable {
@@ -146,7 +146,12 @@ export abstract class Entry {
   public abstract containerTitle?: string;
 
   public abstract DOI?: string;
+
   public abstract files?: string[];
+
+  public get pdfs(): string[] {
+    return this.files?.filter((path) => path.toLowerCase().endsWith('pdf'));
+  }
 
   /**
    * The date of issue. Many references do not contain information about month

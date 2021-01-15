@@ -7,8 +7,8 @@ import {
   SearchMatches,
   SearchMatchPart,
 } from 'obsidian';
-import CitationPlugin from './main';
-import { Entry } from './types';
+import type CitationPlugin from './main';
+import type { Entry } from './types';
 
 // Stub some methods we know are there..
 interface FuzzySuggestModalExt<T> extends FuzzySuggestModal<T> {

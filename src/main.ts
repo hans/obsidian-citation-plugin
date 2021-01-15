@@ -10,7 +10,7 @@ import {
 } from 'obsidian';
 import * as path from 'path';
 import * as chokidar from 'chokidar';
-import * as CodeMirror from 'codemirror';
+import type CodeMirror from 'codemirror';
 
 import {
   compile as compileTemplate,
@@ -99,22 +99,26 @@ export default class CitationPlugin extends Plugin {
   onload(): void {
     this.loadSettings().then(() => this.init());
 
-		// Prepare Citations view
-		this.registerView("citations", this.createCitationsView);
-		this.registerEvent(this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
-			console.log("menu", menu, file, source);
-			menu.addItem((mitem) => {
-				mitem.setTitle("Open citations").onClick(() => {
-					console.log("here");
-					this.app.workspace.splitLeafOrActive(leaf, "vertical").setViewState({
-						type: "citations",
-						active: true,
-						state: {file: file.path, abc: "xyz"},
-						group: leaf,
-					});
-				});
-			})
-		}));
+    // Prepare Citations view
+    this.registerView('citations', this.createCitationsView.bind(this));
+    this.registerEvent(
+      this.app.workspace.on('file-menu', (menu, file, source, leaf) => {
+        console.log('menu', menu, file, source);
+        menu.addItem((mitem) => {
+          mitem.setTitle('Open citations').onClick(() => {
+            console.log('here');
+            this.app.workspace
+              .splitLeafOrActive(leaf, 'vertical')
+              .setViewState({
+                type: 'citations',
+                active: true,
+                state: { file: file.path, abc: 'xyz' },
+                group: leaf,
+              });
+          });
+        });
+      }),
+    );
   }
 
   async init(): Promise<void> {
@@ -201,8 +205,10 @@ export default class CitationPlugin extends Plugin {
       name: 'Open Citations panel',
       callback: () => {
         //this.createCitationsView(this.app.workspace.getRightLeaf(false));
-        this.app.workspace.getRightLeaf(false).setViewState({type: 'citations'});
-      }
+        this.app.workspace
+          .getRightLeaf(false)
+          .setViewState({ type: 'citations' });
+      },
     });
 
     this.addSettingTab(new CitationSettingTab(this.app, this));
@@ -441,8 +447,7 @@ export default class CitationPlugin extends Plugin {
   }
 
   createCitationsView(leaf: WorkspaceLeaf): View {
-		console.log("create with leaf", leaf)
-		return new CitationsView(leaf, this);
-	}
-
+    console.log('create with leaf', leaf);
+    return new CitationsView(leaf, this);
+  }
 }
