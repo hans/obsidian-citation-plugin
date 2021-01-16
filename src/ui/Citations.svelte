@@ -1,5 +1,8 @@
 <script lang="ts">
 
+  import { setIcon } from 'obsidian';
+  import { afterUpdate } from 'svelte';
+
   import type { Entry } from '../types';
 
   export let openPDF = (entry: Entry) => {
@@ -10,7 +13,14 @@
 
   // template variables
   export let loading: boolean = true;
-  export let citations: [Entry, number][];
+  export let citations: [Entry, string[]][];
+
+  afterUpdate(() => {
+    // Create icons via Obsidian API
+    fishAll('.zoteroLinkIcon').forEach((el) => {
+      setIcon(el, 'popup-open');
+    });
+  })
 
 </script>
 
@@ -24,12 +34,14 @@ ul#citations-list li {
   margin: 10px 0;
 }
 
-ul.zoteroLinks {
-  list-style: none;
+.zoteroLinks {
+  padding: 0 6px 0 25px;
 }
-ul.zoteroLinks li {
+
+.zoteroLinks button {
   display: inline-block;
-  margin-right: 5px;
+  margin-right: 3px;
+  padding: 6px;
 }
 </style>
 
@@ -40,7 +52,7 @@ ul.zoteroLinks li {
       <p>Loading citation database. Please wait...</p>
     </div>
   {:else}
-    {#each citations as [citation, count]}
+    {#each citations as [citation, lines]}
       <div class="tree-item">
         <div class="tree-item-self">
           <div class="collapse-icon"></div>
@@ -53,15 +65,21 @@ ul.zoteroLinks li {
             </span>
           </div>
           <div class="tree-item-flair-outer">
-            <span class="tree-item-flair">{count}</span>
+            <span class="tree-item-flair">{lines.length}</span>
           </div>
         </div>
-        <ul class="zoteroLinks">
+        <div class="search-result-file-matches">
+          {#each lines as line}
+            <div class="search-result-file-match">{line}</div>
+          {/each}
+        </div>
+        <div class="zoteroLinks">
+          <button class="zoteroLinkIcon"></button>
           {#if citation.pdfs?.length > 0}
-            <li><button on:click={() => openPDF(citation)}>PDF</button></li>
+            <button on:click={() => openPDF(citation)}>PDF</button>
           {/if}
-          <li><button on:click={() => open(citation.zoteroSelectURI)}>Zot</button></li>
-        </ul>
+          <button on:click={() => open(citation.zoteroSelectURI)}>Zot</button>
+        </div>
       </div>
     {/each}
   {/if}

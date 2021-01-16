@@ -52,7 +52,7 @@ export class CitationsView extends ItemView {
     this.redraw();
   }
 
-  async getCitations(): Promise<[Entry, number][]> {
+  async getCitations(): Promise<[Entry, string[]][]> {
     if (!this.plugin?.library) {
       return [];
     }
@@ -60,19 +60,19 @@ export class CitationsView extends ItemView {
     const content = await this.app.vault.cachedRead(this.file);
 
     // TODO support other citation formats
-    let match = content.matchAll(/\[\[@([^\]]+)\]\]/g);
-    const citekeys = [...match].map((m) => m[1]);
-    // Compute frequency list
-    const citekeyFreqs: [string, number][] = Object.entries(
-      _.countBy(citekeys),
-    );
-
-    const entries = citekeyFreqs
-      .map(
-        ([k, freq]) => <[Entry, number]>[this.plugin.library.entries[k], freq],
-      )
+    const matches = content.matchAll(/^.*\[\[@([^\]]+)\]\].*$/gm);
+    const results: [Entry, string][] = [...matches]
+      .map((match) => {
+        const [line, citekey] = match;
+        return [this.plugin.library.entries[citekey], line] as [Entry, string];
+      })
       .filter(([entry]) => !!entry);
-    return entries;
+
+    const groupedResults = _.groupBy(results, ([entry]) => entry.id);
+    return Object.values(groupedResults).map((occurrences) => {
+      const entry = occurrences[0][0];
+      return [entry, occurrences.map(([, line]) => line)];
+    });
   }
 
   async redraw(): Promise<void> {
