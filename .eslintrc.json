@@ -17,5 +17,11 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "plugins": ["prettier", "@typescript-eslint"]
+  "overrides": [
+	{
+	  "files": ["*.svelte"],
+	  "processor": "svelte3/svelte3"
+	}
+  ],
+  "plugins": ["prettier", "@typescript-eslint", "svelte3"]
 }
