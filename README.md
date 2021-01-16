@@ -9,6 +9,7 @@ The plugin supports reading bibliographies in [BibTeX / BibLaTeX `.bib` format][
 ## Setup
 
 You can install this plugin via the Obsidian "Third-party plugin interface." It requires Obsidian 0.9.20 or higher.
+After installing, toggle the plugin on under "Third-party plugin interface."
 
 Once the plugin is installed, you must provide it with a bibliography file:
 
@@ -18,7 +19,7 @@ Once the plugin is installed, you must provide it with a bibliography file:
   - You can optionally choose "Keep updated" to automatically re-export the collection -- this is recommended!
 - If you use other reference managers, check their documentation for BibLaTeX or CSL-JSON export support. We plan to officially support other managers in the future.
 
-Now open the Obsidian preferences and view the "Citations" tab. Paste the path to the exported file (`.bib` or `.json`, depending on the format you chose) in the text field labeled "Citation export path." After closing the settings dialog, you should now be able to search your references from within Obsidian!
+Now open the Obsidian preferences/settings and view the "Citations" tab under "Plugin Options." Paste the path to the exported file (`.bib` or `.json`, depending on the format you chose) in the text field labeled "Citation export path." After closing the settings dialog, you should now be able to search your references from within Obsidian!
 
 ## Usage
 
