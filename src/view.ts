@@ -60,7 +60,9 @@ export class CitationsView extends ItemView {
     const content = await this.app.vault.cachedRead(this.file);
 
     // TODO support other citation formats
-    const matches = content.matchAll(/^.*\[\[@([^\]]+)\]\].*$/gm);
+    const matches = content.matchAll(
+      /^.*\[\[?@([^\]]+?)(?:[#^]+[^\]]+)?\]\]?.*$/gm,
+    );
     const results: [Entry, string][] = [...matches]
       .map((match) => {
         const [line, citekey] = match;
