@@ -24,6 +24,7 @@ export const TEMPLATE_VARIABLES = {
   URL: '',
   year: 'Publication year',
   zoteroSelectURI: 'URI to open the reference in Zotero',
+  publisher: '',
 };
 
 export class Library {
@@ -51,6 +52,7 @@ export class Library {
       URL: entry.URL,
       year: entry.year?.toString(),
       zoteroSelectURI: entry.zoteroSelectURI,
+      publisher: entry.publisher,
     };
 
     return { entry: entry.toJSON(), ...shortcuts };
@@ -137,6 +139,7 @@ export abstract class Entry {
   public abstract page?: string;
   public abstract title?: string;
   public abstract URL?: string;
+  public abstract publisher?: string;
 
   protected _year?: string;
   public get year(): number {
@@ -189,6 +192,7 @@ export interface EntryDataCSL {
   page?: string;
   title?: string;
   URL?: string;
+  publisher?: string;
 }
 
 export class EntryCSLAdapter extends Entry {
@@ -251,6 +255,10 @@ export class EntryCSLAdapter extends Entry {
   get URL() {
     return this.data.URL;
   }
+
+  get publisher() {
+    return this.data.publisher;
+  }
 }
 
 const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
@@ -267,6 +275,7 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   shorttitle: 'titleShort',
   url: 'URL',
   year: '_year',
+  publisher: 'publisher'
 };
 
 // BibLaTeX parser returns arrays of property values (allowing for repeated
@@ -285,6 +294,7 @@ const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
   'shorttitle',
   'url',
   '_year',
+  'publisher',
 ];
 
 export class EntryBibLaTeXAdapter extends Entry {
@@ -299,6 +309,7 @@ export class EntryBibLaTeXAdapter extends Entry {
   titleShort?: string;
   URL?: string;
   _year?: string;
+  publisher?: string;
 
   constructor(private data: EntryDataBibLaTeX) {
     super();
