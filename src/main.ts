@@ -17,13 +17,14 @@ import {
   TemplateDelegate as Template,
 } from 'handlebars';
 
+import CitationService from './citation-service';
 import {
   InsertCitationModal,
   InsertNoteLinkModal,
   InsertNoteContentModal,
   OpenNoteModal,
 } from './modals';
-import { VaultExt } from './obsidian-extensions.d';
+import type { VaultExt } from './obsidian-extensions.d';
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import {
   Entry,
@@ -45,6 +46,7 @@ import { CitationsView } from './view';
 export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
   library: Library;
+  citationService = new CitationService();
 
   // Template compilation options
   private templateSettings = {
@@ -271,6 +273,8 @@ export default class CitationPlugin extends Plugin {
               entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
             ),
           );
+          this.citationService.library = this.library;
+
           console.debug(
             `Citation plugin: successfully loaded library with ${this.library.size} entries.`,
           );

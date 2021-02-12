@@ -52,7 +52,7 @@ export class CitationsView extends ItemView {
     this.redraw();
   }
 
-  async getCitations(): Promise<[Entry, string[]][]> {
+  async getCitations(): Promise<[Entry, string, string[]][]> {
     if (!this.plugin?.library) {
       return [];
     }
@@ -69,11 +69,20 @@ export class CitationsView extends ItemView {
         return [this.plugin.library.entries[citekey], line] as [Entry, string];
       })
       .filter(([entry]) => !!entry);
-
     const groupedResults = _.groupBy(results, ([entry]) => entry.id);
+    const uniqueIds = Object.keys(groupedResults);
+
+    // Render bibliography strings with citation service.
+    const [, bibStrings] = this.plugin.citationService.getBibliography(
+      uniqueIds,
+    );
+    const bibStringMap = Object.fromEntries(_.zip(uniqueIds, bibStrings));
+
     return Object.values(groupedResults).map((occurrences) => {
       const entry = occurrences[0][0];
-      return [entry, occurrences.map(([, line]) => line)];
+      const bibString = bibStringMap[entry.id];
+      const occurrenceStrings = occurrences.map(([, line]) => line);
+      return [entry, bibString, occurrenceStrings];
     });
   }
 

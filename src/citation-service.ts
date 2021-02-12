@@ -1,6 +1,6 @@
 import * as CSL from 'citeproc';
 
-import { Library } from './types';
+import type { Library } from './types';
 
 // TODO figure out locale string import ..
 // import localeEnUS from './resources/csl/locales/locales-en-US.xml';
@@ -1054,7 +1054,7 @@ export default class CitationService {
     return this.engine.makeCitationCluster([{ id: id }]);
   }
 
-  getBibliography(ids: string[]): any {
+  getBibliography(ids: string[]): [BibliographyOptions, string[]] {
     if (!this.library) return;
 
     this.engine.updateItems(ids);

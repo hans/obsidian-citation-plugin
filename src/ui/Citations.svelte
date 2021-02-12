@@ -13,7 +13,7 @@
 
   // template variables
   export let loading: boolean = true;
-  export let citations: [Entry, string[]][];
+  export let citations: [Entry, string, string[]][];
 
   afterUpdate(() => {
     // Create icons via Obsidian API
@@ -117,17 +117,12 @@ ul#citations-list li {
       <p>Loading citation database. Please wait...</p>
     </div>
   {:else}
-    {#each citations as [citation, lines]}
+    {#each citations as [entry, citation, lines]}
       <div class="tree-item">
         <div class="tree-item-self">
           <div class="collapse-icon"></div>
           <div class="tree-item-inner">
-            <span class="zoteroTitle">{citation.title}</span>
-            <span class="zoteroCitekey">{citation.id}</span>
-            <span class="zoteroAuthors"
-              class:zoteroAuthorsEmpty="{!citation.authorString}">
-              {citation.authorString}
-            </span>
+            {@html citation}
           </div>
           <div class="tree-item-flair-outer">
             <span class="tree-item-flair">{lines.length}</span>
@@ -140,10 +135,10 @@ ul#citations-list li {
         </div>
         <div class="zoteroLinks">
           <button class="zoteroLinkIcon"></button>
-          {#if citation.pdfs?.length > 0}
-            <button on:click={() => openPDF(citation)}>PDF</button>
+          {#if entry.pdfs?.length > 0}
+            <button on:click={() => openPDF(entry)}>PDF</button>
           {/if}
-          <button on:click={() => open(citation.zoteroSelectURI)}>Zot</button>
+          <button on:click={() => open(entry.zoteroSelectURI)}>Zot</button>
         </div>
       </div>
     {/each}
