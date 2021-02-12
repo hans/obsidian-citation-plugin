@@ -70,6 +70,7 @@ const expectedRender: Record<string, string>[] = [
     URL: 'http://aclasb.dfki.de/nlp/bib/N06-2001',
     year: '2006',
     zoteroSelectURI: 'zotero://select/items/@alexandrescu2006factored',
+    publisher: 'Association for Computational Linguistics',
   },
   {
     citekey: 'bar-ashersiegal2020perspectives',
@@ -83,6 +84,7 @@ const expectedRender: Record<string, string>[] = [
     URL: 'http://link.springer.com/10.1007/978-3-030-34308-8',
     year: '2020',
     zoteroSelectURI: 'zotero://select/items/@bar-ashersiegal2020perspectives',
+    publisher: 'Springer International Publishing',
   },
 ];
 
