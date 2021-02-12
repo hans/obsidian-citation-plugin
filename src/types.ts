@@ -175,6 +175,18 @@ export abstract class Entry {
 
     return jsonObj;
   }
+
+  toCSLJSON(): CSLItem {
+    const ret = this.toJSON() as CSLItem;
+
+    if (this.year) {
+      ret['issued'] = { 'date-parts': [[this.year]] };
+    }
+
+    ret['container-title'] = ret['containerTitle'];
+
+    return ret;
+  }
 }
 
 export type EntryData = EntryDataCSL | EntryDataBibLaTeX;
@@ -275,7 +287,7 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   shorttitle: 'titleShort',
   url: 'URL',
   year: '_year',
-  publisher: 'publisher'
+  publisher: 'publisher',
 };
 
 // BibLaTeX parser returns arrays of property values (allowing for repeated

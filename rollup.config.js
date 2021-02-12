@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import webWorkerLoader from 'rollup-plugin-web-worker-loader';
+import { string } from 'rollup-plugin-string';
 
 export default {
   input: 'src/main.ts',
@@ -29,6 +30,7 @@ export default {
       "require('fs')": "require('original-fs')",
     }),
 
+    string({include: 'src/resources/**/*'}),
     typescript(),
     nodeResolve({ browser: true }),
     commonjs({ ignore: ['original-fs'] }),
@@ -39,5 +41,6 @@ export default {
       preserveSource: true,
       sourcemap: true,
     }),
+
   ],
 };

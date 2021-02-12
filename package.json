@@ -34,6 +34,7 @@
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "prettier": "^2.2.1",
     "rollup": "^2.32.1",
+    "rollup-plugin-string": "^3.0.0",
     "rollup-plugin-web-worker-loader": "^1.5.0",
     "ts-jest": "^26.4.4",
     "tslib": "^2.0.3",
@@ -42,8 +43,9 @@
   },
   "dependencies": {
     "@retorquere/bibtex-parser": "^3.2.30",
-    "handlebars": "^4.7.6",
     "chokidar": "^3.5.0",
+    "citeproc": "^2.4.59",
+    "handlebars": "^4.7.6",
     "open": "^7.3.0",
     "promise-worker": "^2.0.1"
   },
