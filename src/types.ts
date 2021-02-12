@@ -216,6 +216,18 @@ export abstract class Entry {
 
     return jsonObj;
   }
+
+  toCSLJSON(): CSLItem {
+    const ret = this.toJSON() as CSLItem;
+
+    if (this.year) {
+      ret['issued'] = { 'date-parts': [[this.year]] };
+    }
+
+    ret['container-title'] = ret['containerTitle'];
+
+    return ret;
+  }
 }
 
 export type EntryData = EntryDataCSL | EntryDataBibLaTeX;
