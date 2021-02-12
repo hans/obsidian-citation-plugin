@@ -21,7 +21,7 @@ import {
   InsertNoteContentModal,
   OpenNoteModal,
 } from './modals';
-
+import { VaultExt } from './obsidian-extensions.d';
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import {
   Entry,
@@ -340,10 +340,22 @@ export default class CitationPlugin extends Plugin {
 
   async insertLiteratureNoteLink(citekey: string): Promise<void> {
     this.getOrCreateLiteratureNoteFile(citekey)
-      .then(() => {
-        const title = this.getTitleForCitekey(citekey),
+      .then((file: TFile) => {
+        const useMarkdown: boolean = (<VaultExt>this.app.vault).getConfig(
+          'useMarkdownLinks',
+        );
+        const title = this.getTitleForCitekey(citekey);
+
+        let linkText: string;
+        if (useMarkdown) {
+          const uri = encodeURI(
+            this.app.metadataCache.fileToLinktext(file, '', false),
+          );
+          linkText = `[${title}](${uri})`;
+        } else {
           linkText = `[[${title}]]`;
-        // console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
+        }
+
         this.editor.replaceRange(linkText, this.editor.getCursor());
       })
       .catch(console.error);
