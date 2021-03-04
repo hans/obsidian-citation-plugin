@@ -47,6 +47,8 @@ export class Library {
       authorString: entry.authorString,
       containerTitle: entry.containerTitle,
       DOI: entry.DOI,
+      eprint: entry.eprint,
+      eprinttype: entry.eprinttype,
       page: entry.page,
       title: entry.title,
       URL: entry.URL,
@@ -141,6 +143,9 @@ export abstract class Entry {
   public abstract URL?: string;
   public abstract publisher?: string;
 
+  public abstract eprint?: string;
+  public abstract eprinttype?: string;
+
   protected _year?: string;
   public get year(): number {
     return this._year
@@ -200,6 +205,8 @@ export class EntryCSLAdapter extends Entry {
     super();
   }
 
+  eprint: string = null;
+  eprinttype: string = null;
   files: string[] = null;
 
   get id() {
@@ -266,6 +273,8 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   booktitle: '_containerTitle',
   date: 'issued',
   doi: 'DOI',
+  eprint: 'eprint',
+  eprinttype: 'eprinttype',
   eventtitle: 'event',
   journal: '_containerTitle',
   journaltitle: '_containerTitle',
@@ -286,6 +295,8 @@ const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
   '_containerTitle',
   'date',
   'doi',
+  'eprint',
+  'eprinttype',
   'eventtitle',
   'journaltitle',
   'pages',
@@ -302,6 +313,8 @@ export class EntryBibLaTeXAdapter extends Entry {
   _containerTitle?: string;
   containerTitleShort?: string;
   DOI?: string;
+  eprint?: string;
+  eprinttype?: string;
   event?: string;
   issued?: string;
   page?: string;

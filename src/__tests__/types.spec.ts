@@ -23,6 +23,7 @@ const expectedRender: Record<string, string>[] = [
     authorString: 'S. Weiner',
     containerTitle: 'Rev. Mineral. Geochemistry',
     DOI: '10.2113/0540001',
+    eprint: '1105.3402',
     page: '1-29',
     title:
       'An Overview of Biomineralization Processes and the Problem of the Vital Effect',
@@ -38,6 +39,8 @@ const expectedRender: Record<string, string>[] = [
       'Samira Abnar, Lisa Beinborn, Rochelle Choenni, Willem Zuidema',
     containerTitle: 'arxiv:1906.01539 [cs, q-bio]',
     DOI: undefined,
+    eprint: '1906.01539',
+    eprinttype: 'arxiv',
     page: undefined,
     title:
       'Blackbox meets blackbox: Representational Similarity and Stability Analysis of Neural Language Models and Brains',
@@ -88,14 +91,26 @@ const expectedRender: Record<string, string>[] = [
   },
 ];
 
+/**
+ * Fields available only in the BibLaTeX format, and which shouldn't be checked
+ * against CSL format
+ */
+const BIBLATEX_FIELDS_ONLY = ['eprint', 'eprinttype', 'files'];
+
 // Test whether loaded and expected libraries are the same, ignoring casing and
 // hyphenation and the `entry` field
 function matchLibraryRender(
   actual: Record<string, string>[],
   expected: Record<string, string>[],
+  dropFields?: string[],
 ): void {
   const transform = (dict: Record<string, string>): Record<string, string> => {
     delete dict.entry;
+
+    if (dropFields) {
+      dropFields.forEach((f) => delete dict[f]);
+    }
+
     return _.mapValues(dict, (val: unknown) =>
       val
         ?.toString()
@@ -198,7 +213,7 @@ describe('csl library', () => {
       return library.getTemplateVariablesForCitekey(citekey);
     });
 
-    matchLibraryRender(templateVariables, expectedRender);
+    matchLibraryRender(templateVariables, expectedRender, BIBLATEX_FIELDS_ONLY);
   });
 
   test('advanced template render', () => {
