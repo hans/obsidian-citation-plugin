@@ -88,6 +88,7 @@ const expectedRender: Record<string, string>[] = [
     year: '2020',
     zoteroSelectURI: 'zotero://select/items/@bar-ashersiegal2020perspectives',
     publisher: 'Springer International Publishing',
+    publisherPlace: 'Cham',
   },
 ];
 

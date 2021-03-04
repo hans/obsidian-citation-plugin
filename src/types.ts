@@ -19,12 +19,16 @@ export const TEMPLATE_VARIABLES = {
   containerTitle:
     'Title of the container holding the reference (e.g. book title for a book chapter, or the journal title for a journal article)',
   DOI: '',
+  eprint: '',
+  eprinttype: '',
+  eventPlace: 'Location of event',
   page: 'Page or page range',
+  publisher: '',
+  publisherPlace: 'Location of publisher',
   title: '',
   URL: '',
   year: 'Publication year',
   zoteroSelectURI: 'URI to open the reference in Zotero',
-  publisher: '',
 };
 
 export class Library {
@@ -49,12 +53,14 @@ export class Library {
       DOI: entry.DOI,
       eprint: entry.eprint,
       eprinttype: entry.eprinttype,
+      eventPlace: entry.eventPlace,
       page: entry.page,
+      publisher: entry.publisher,
+      publisherPlace: entry.publisherPlace,
       title: entry.title,
       URL: entry.URL,
       year: entry.year?.toString(),
       zoteroSelectURI: entry.zoteroSelectURI,
-      publisher: entry.publisher,
     };
 
     return { entry: entry.toJSON(), ...shortcuts };
@@ -141,8 +147,15 @@ export abstract class Entry {
   public abstract page?: string;
   public abstract title?: string;
   public abstract URL?: string;
-  public abstract publisher?: string;
 
+  public abstract eventPlace?: string;
+
+  public abstract publisher?: string;
+  public abstract publisherPlace?: string;
+
+  /**
+   * BibLaTeX-specific properties
+   */
   public abstract eprint?: string;
   public abstract eprinttype?: string;
 
@@ -192,12 +205,14 @@ export interface EntryDataCSL {
   author?: Author[];
   'container-title'?: string;
   DOI?: string;
+  'event-place'?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   issued?: { 'date-parts': [any[]] };
   page?: string;
+  publisher?: string;
+  'publisher-place'?: string;
   title?: string;
   URL?: string;
-  publisher?: string;
 }
 
 export class EntryCSLAdapter extends Entry {
@@ -237,6 +252,10 @@ export class EntryCSLAdapter extends Entry {
     return this.data.DOI;
   }
 
+  get eventPlace() {
+    return this.data['event-place'];
+  }
+
   get issuedDate() {
     if (
       !(
@@ -255,16 +274,20 @@ export class EntryCSLAdapter extends Entry {
     return this.data.page;
   }
 
+  get publisher() {
+    return this.data.publisher;
+  }
+
+  get publisherPlace() {
+    return this.data['publisher-place'];
+  }
+
   get title() {
     return this.data.title;
   }
 
   get URL() {
     return this.data.URL;
-  }
-
-  get publisher() {
-    return this.data.publisher;
   }
 }
 
@@ -278,11 +301,13 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   eventtitle: 'event',
   journal: '_containerTitle',
   journaltitle: '_containerTitle',
+  location: 'publisherPlace',
   pages: 'page',
   shortjournal: 'containerTitleShort',
   title: 'title',
   shorttitle: 'titleShort',
   url: 'URL',
+  venue: 'eventPlace',
   year: '_year',
   publisher: 'publisher'
 };
@@ -299,11 +324,13 @@ const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
   'eprinttype',
   'eventtitle',
   'journaltitle',
+  'location',
   'pages',
   'shortjournal',
   'title',
   'shorttitle',
   'url',
+  'venue',
   '_year',
   'publisher',
 ];
@@ -316,13 +343,15 @@ export class EntryBibLaTeXAdapter extends Entry {
   eprint?: string;
   eprinttype?: string;
   event?: string;
+  eventPlace?: string;
   issued?: string;
   page?: string;
+  publisher?: string;
+  publisherPlace?: string;
   title?: string;
   titleShort?: string;
   URL?: string;
   _year?: string;
-  publisher?: string;
 
   constructor(private data: EntryDataBibLaTeX) {
     super();
