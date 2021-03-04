@@ -43,6 +43,11 @@ export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
   library: Library;
 
+  // Template compilation options
+  private templateSettings = {
+    noEscape: true,
+  };
+
   private loadWorker = new WorkerManager(new LoadWorker(), {
     blockingChannel: true,
   });
@@ -252,19 +257,31 @@ export default class CitationPlugin extends Plugin {
   }
 
   get literatureNoteTitleTemplate(): Template {
-    return compileTemplate(this.settings.literatureNoteTitleTemplate);
+    return compileTemplate(
+      this.settings.literatureNoteTitleTemplate,
+      this.templateSettings,
+    );
   }
 
   get literatureNoteContentTemplate(): Template {
-    return compileTemplate(this.settings.literatureNoteContentTemplate);
+    return compileTemplate(
+      this.settings.literatureNoteContentTemplate,
+      this.templateSettings,
+    );
   }
 
   get markdownCitationTemplate(): Template {
-    return compileTemplate(this.settings.markdownCitationTemplate);
+    return compileTemplate(
+      this.settings.markdownCitationTemplate,
+      this.templateSettings,
+    );
   }
 
   get alternativeMarkdownCitationTemplate(): Template {
-    return compileTemplate(this.settings.alternativeMarkdownCitationTemplate);
+    return compileTemplate(
+      this.settings.alternativeMarkdownCitationTemplate,
+      this.templateSettings,
+    );
   }
 
   getTitleForCitekey(citekey: string): string {
