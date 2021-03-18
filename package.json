@@ -8,7 +8,13 @@
     "build": "rollup --config rollup.config.js",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest",
-    "doc": "typedoc src/types.ts"
+    "doc": "typedoc src/types.ts",
+    "release": "standard-version"
+  },
+  "standard-version": {
+    "bumpFiles": [
+      "manifest.json"
+    ]
   },
   "keywords": [],
   "author": "Jon Gauthier",
