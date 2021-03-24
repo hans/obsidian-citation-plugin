@@ -29,6 +29,36 @@ The plugin offers four simple features at the moment:
 3. **Insert literature note content in the current pane** (no hotkey by default): insert content describing a particular reference into the current pane. (This can be useful for updating literature notes you already have but which are missing reference information.)
 4. **Insert Markdown citation** (no hotkey by default): insert a [Pandoc-style citation][3] for a particular reference. (The exact format of the citation can be configured in the plugin settings.)
 
+### Templates
+You can set up your own template for both the title and content of literature notes. The following variables can be used:
+
+```
+* {{citekey}}
+* {{abstract}}
+* {{authorString}}
+* {{containerTitle}}
+* {{DOI}}
+* {{eprint}}
+* {{eprinttype}}
+* {{eventPlace}}
+* {{page}}
+* {{publisher}}
+* {{publisherPlace}}
+* {{title}}
+* {{URL}}
+* {{year}}
+* {{zoteroSelectURI}}
+```
+For example, your literature note title template can simply be `@{{citekey}}` and the content template can look like:
+```
+---
+title: {{title}}
+authors: {{authorString}}
+year: {{year}}
+---
+{{abstract}}
+```
+
 ## License
 
 MIT License.
