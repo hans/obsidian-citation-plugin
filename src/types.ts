@@ -29,6 +29,7 @@ export const TEMPLATE_VARIABLES = {
   URL: '',
   year: 'Publication year',
   zoteroSelectURI: 'URI to open the reference in Zotero',
+  note: ''
 };
 
 export class Library {
@@ -61,6 +62,7 @@ export class Library {
       URL: entry.URL,
       year: entry.year?.toString(),
       zoteroSelectURI: entry.zoteroSelectURI,
+      note: entry.note
     };
 
     return { entry: entry.toJSON(), ...shortcuts };
@@ -165,6 +167,13 @@ export abstract class Entry {
       ? parseInt(this._year)
       : this.issuedDate?.getUTCFullYear();
   }
+
+  protected _note?: string[];
+
+  public get note():string {
+    if (!this._note) return null
+    return this._note.map(el => el.replace(/(zotero:\/\/.+)/g, "[Link]($1)")).join("\n\n");
+  } 
 
   /**
    * A URI which will open the relevant entry in the Zotero client.
@@ -309,7 +318,8 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   url: 'URL',
   venue: 'eventPlace',
   year: '_year',
-  publisher: 'publisher'
+  publisher: 'publisher',
+  note:'_note'
 };
 
 // BibLaTeX parser returns arrays of property values (allowing for repeated
@@ -352,6 +362,7 @@ export class EntryBibLaTeXAdapter extends Entry {
   titleShort?: string;
   URL?: string;
   _year?: string;
+  _note?: string[];
 
   constructor(private data: EntryDataBibLaTeX) {
     super();

@@ -399,3 +399,4 @@ export default class CitationPlugin extends Plugin {
     this.editor.replaceRange(citation, this.editor.getCursor());
   }
 }
+//# sourceURL=main.js
