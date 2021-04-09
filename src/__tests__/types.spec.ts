@@ -24,6 +24,7 @@ const expectedRender: Record<string, string>[] = [
     containerTitle: 'Rev. Mineral. Geochemistry',
     DOI: '10.2113/0540001',
     eprint: '1105.3402',
+    note: 'This is a test note with some <b>formatting</b>.',
     page: '1-29',
     title:
       'An Overview of Biomineralization Processes and the Problem of the Vital Effect',
@@ -96,7 +97,7 @@ const expectedRender: Record<string, string>[] = [
  * Fields available only in the BibLaTeX format, and which shouldn't be checked
  * against CSL format
  */
-const BIBLATEX_FIELDS_ONLY = ['eprint', 'eprinttype', 'files'];
+const BIBLATEX_FIELDS_ONLY = ['eprint', 'eprinttype', 'files', 'note'];
 
 // Test whether loaded and expected libraries are the same, ignoring casing and
 // hyphenation and the `entry` field

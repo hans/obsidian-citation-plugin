@@ -22,6 +22,7 @@ export const TEMPLATE_VARIABLES = {
   eprint: '',
   eprinttype: '',
   eventPlace: 'Location of event',
+  note: '',
   page: 'Page or page range',
   publisher: '',
   publisherPlace: 'Location of publisher',
@@ -54,6 +55,7 @@ export class Library {
       eprint: entry.eprint,
       eprinttype: entry.eprinttype,
       eventPlace: entry.eventPlace,
+      note: entry.note,
       page: entry.page,
       publisher: entry.publisher,
       publisherPlace: entry.publisherPlace,
@@ -164,6 +166,14 @@ export abstract class Entry {
     return this._year
       ? parseInt(this._year)
       : this.issuedDate?.getUTCFullYear();
+  }
+
+  protected _note?: string[];
+
+  public get note(): string {
+    return this._note
+      ?.map((el) => el.replace(/(zotero:\/\/.+)/g, '[Link]($1)'))
+      .join('\n\n');
   }
 
   /**
@@ -309,7 +319,8 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   url: 'URL',
   venue: 'eventPlace',
   year: '_year',
-  publisher: 'publisher'
+  publisher: 'publisher',
+  note: '_note',
 };
 
 // BibLaTeX parser returns arrays of property values (allowing for repeated
@@ -352,6 +363,7 @@ export class EntryBibLaTeXAdapter extends Entry {
   titleShort?: string;
   URL?: string;
   _year?: string;
+  _note?: string[];
 
   constructor(private data: EntryDataBibLaTeX) {
     super();
