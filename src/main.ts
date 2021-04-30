@@ -14,6 +14,7 @@ import {
   compile as compileTemplate,
   TemplateDelegate as Template,
 } from 'handlebars';
+import * as registerHandlebarsHelpers from 'handlebars-helpers';
 
 import {
   InsertCitationModal,
@@ -165,6 +166,16 @@ export default class CitationPlugin extends Plugin {
     });
 
     this.addSettingTab(new CitationSettingTab(this.app, this));
+
+    // Register Handlebars helpers.
+    registerHandlebarsHelpers([
+      // 'array',
+      // 'comparison',
+      // 'html',
+      // 'object',
+      'string',
+      // 'url',
+    ]);
   }
 
   /**
