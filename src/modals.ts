@@ -58,7 +58,7 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     setTimeout(() => {
       this.inputEl.addEventListener('keydown', (ev) => this.onInputKeydown(ev));
       this.inputEl.addEventListener('keyup', (ev) => this.onInputKeyup(ev));
-    }, 50);
+    }, 200);
   }
 
   onClose() {
