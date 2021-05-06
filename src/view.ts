@@ -23,7 +23,9 @@ export class CitationsView extends ItemView {
     this.registerEvent(
       this.app.workspace.on('file-open', this.onFileOpen, this),
     );
-    this.registerEvent(this.app.on('codemirror', this.onCodeMirror, this));
+    this.registerEvent(
+      this.app.workspace.on('codemirror', this.onCodeMirror, this),
+    );
 
     console.log('citation view loaded');
   }
@@ -41,19 +43,8 @@ export class CitationsView extends ItemView {
   }
 
   async getCitations(content: string): Promise<[Entry, string, string[]][]> {
-    if (!this.plugin?.library) {
-      return [];
-    }
-
-    // TODO support other citation formats
-    const matches = content.matchAll(
-      /^.*\[\[?@([^\]]+?)(?:[#^]+[^\]]+)?\]\]?.*$/gm,
-    );
-    const results: [Entry, string][] = [...matches]
-      .map((match) => {
-        const [line, citekey] = match;
-        return [this.plugin.library.entries[citekey], line] as [Entry, string];
-      })
+    const results = this.plugin
+      .getCitations(content)
       .filter(([entry]) => !!entry);
     const groupedResults = _.groupBy(results, ([entry]) => entry.id);
     const uniqueIds = Object.keys(groupedResults);
@@ -102,5 +93,4 @@ export class CitationsView extends ItemView {
   onCodeMirror(cm: CodeMirror.Editor) {
     cm.on('change', this.redraw);
   }
-
 }

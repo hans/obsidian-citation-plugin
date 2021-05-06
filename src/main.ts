@@ -26,6 +26,7 @@ import {
 } from './modals';
 import type { VaultExt } from './obsidian-extensions.d';
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
+import CitationStatusBarItem from './status-bar';
 import {
   Entry,
   EntryData,
@@ -47,6 +48,7 @@ export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
   library: Library;
   citationService = new CitationService();
+  statusBarItem: CitationStatusBarItem;
 
   // Template compilation options
   private templateSettings = {
@@ -214,6 +216,9 @@ export default class CitationPlugin extends Plugin {
     });
 
     this.addSettingTab(new CitationSettingTab(this.app, this));
+
+    this.statusBarItem = new CitationStatusBarItem(this);
+    this.statusBarItem.onload();
   }
 
   /**
@@ -274,6 +279,8 @@ export default class CitationPlugin extends Plugin {
             ),
           );
           this.citationService.library = this.library;
+
+          this.statusBarItem.updateCitationCount(null);
 
           console.debug(
             `Citation plugin: successfully loaded library with ${this.library.size} entries.`,
@@ -453,5 +460,28 @@ export default class CitationPlugin extends Plugin {
   createCitationsView(leaf: WorkspaceLeaf): View {
     console.log('create with leaf', leaf);
     return new CitationsView(leaf, this);
+  }
+
+  /**
+   * Extract a list of citations from the given Markdown string.
+   * Each element of the list is a 2-tuple consisting of an individual
+   * citation's corresponding `Entry` in the library (if it exists, or null),
+   * and the originating citation string including line context in the content.
+   */
+  getCitations(content: string): [Entry, string][] {
+    if (!this.library) {
+      return null;
+    }
+
+    // TODO support other citation formats
+    const matches = content.matchAll(
+      /^.*\[\[?@([^\]]+?)(?:[#^]+[^\]]+)?\]\]?.*$/gm,
+    );
+    const results: [Entry, string][] = [...matches].map((match) => {
+      const [line, citekey] = match;
+      return [this.library.entries[citekey], line] as [Entry, string];
+    });
+
+    return results;
   }
 }
