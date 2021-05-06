@@ -23,24 +23,12 @@ export class CitationsView extends ItemView {
     this.registerEvent(
       this.app.workspace.on('file-open', this.onFileOpen, this),
     );
-    this.registerEvent(this.app.vault.on('create', this.onFileChanged, this));
-    this.registerEvent(this.app.vault.on('modify', this.onFileChanged, this));
-    this.registerEvent(this.app.vault.on('rename', this.onFileRename, this));
-    this.registerEvent(this.app.vault.on('delete', this.onFileDeleted, this));
+    this.registerEvent(this.app.on('codemirror', this.onCodeMirror, this));
 
     console.log('citation view loaded');
   }
 
   async onOpen() {
-    const activeLeaf = this.app.workspace.activeLeaf;
-    const activeFile = (activeLeaf?.view as FileView)?.file;
-
-    if (!activeFile) {
-      // TODO will this ever happen?
-    }
-
-    this.file = activeFile;
-
     this.view = new Citations({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target: (this as any).contentEl,
@@ -52,12 +40,10 @@ export class CitationsView extends ItemView {
     this.redraw();
   }
 
-  async getCitations(): Promise<[Entry, string, string[]][]> {
+  async getCitations(content: string): Promise<[Entry, string, string[]][]> {
     if (!this.plugin?.library) {
       return [];
     }
-
-    const content = await this.app.vault.cachedRead(this.file);
 
     // TODO support other citation formats
     const matches = content.matchAll(
@@ -91,8 +77,11 @@ export class CitationsView extends ItemView {
       if (this.plugin.isLibraryLoading) {
         this.view.$set({ citations: null, loading: true });
       } else {
-        const citations = await this.getCitations();
-        console.log(citations);
+        const activeLeaf: any = this.app.workspace.activeLeaf ?? null;
+        const data: string = activeLeaf?.view?.data;
+        if (data == null) return;
+
+        const citations = await this.getCitations(data);
         this.view.$set({ citations, loading: false });
       }
     }
@@ -107,15 +96,11 @@ export class CitationsView extends ItemView {
   }
 
   onFileOpen(file: TFile) {
-    this.file = file;
     this.redraw();
   }
 
-  onFileChanged(file: TFile) {
-    this.redraw();
+  onCodeMirror(cm: CodeMirror.Editor) {
+    cm.on('change', this.redraw);
   }
 
-  onFileRename(file: TFile) {}
-
-  onFileDeleted(file: TFile) {}
 }
