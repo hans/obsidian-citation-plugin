@@ -24,7 +24,7 @@ import {
   InsertNoteContentModal,
   OpenNoteModal,
 } from './modals';
-import type { VaultExt } from './obsidian-extensions.d';
+import type { VaultExt, WorkspaceExt } from './obsidian-extensions.d';
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import CitationStatusBarItem from './status-bar';
 import {
@@ -45,9 +45,14 @@ import LoadWorker from 'web-worker:./worker';
 import { CitationsView } from './view';
 
 export default class CitationPlugin extends Plugin {
+  // Services
   settings: CitationsPluginSettings;
   library: Library;
   citationService = new CitationService();
+
+  // UI members/constants
+  VIEW_TYPE_CITATIONS = 'citations';
+  VIEW_SIDE: 'left' | 'right' = 'right';
   statusBarItem: CitationStatusBarItem;
 
   // Template compilation options
@@ -104,17 +109,21 @@ export default class CitationPlugin extends Plugin {
     this.loadSettings().then(() => this.init());
 
     // Prepare Citations view
-    this.registerView('citations', this.createCitationsView.bind(this));
+    this.registerView(
+      this.VIEW_TYPE_CITATIONS,
+      this.createCitationsView.bind(this),
+    );
     this.registerEvent(
       this.app.workspace.on('file-menu', (menu, file, source, leaf) => {
         console.log('menu', menu, file, source);
         menu.addItem((mitem) => {
           mitem.setTitle('Open citations').onClick(() => {
+            this.initLeaf();
             console.log('here');
             this.app.workspace
               .splitLeafOrActive(leaf, 'vertical')
               .setViewState({
-                type: 'citations',
+                type: this.VIEW_TYPE_CITATIONS,
                 active: true,
                 state: { file: file.path, abc: 'xyz' },
                 group: leaf,
@@ -207,11 +216,15 @@ export default class CitationPlugin extends Plugin {
     this.addCommand({
       id: 'open-citations-view',
       name: 'Open Citations panel',
-      callback: () => {
-        //this.createCitationsView(this.app.workspace.getRightLeaf(false));
-        this.app.workspace
-          .getRightLeaf(false)
-          .setViewState({ type: 'citations' });
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return (
+            this.app.workspace.getLeavesOfType(this.VIEW_TYPE_CITATIONS)
+              .length == 0
+          );
+        }
+
+        this.initLeaf();
       },
     });
 
@@ -460,6 +473,25 @@ export default class CitationPlugin extends Plugin {
   createCitationsView(leaf: WorkspaceLeaf): View {
     console.log('create with leaf', leaf);
     return new CitationsView(leaf, this);
+  }
+
+  initLeaf(): void {
+    if (
+      this.app.workspace.getLeavesOfType(this.VIEW_TYPE_CITATIONS).length != 0
+    )
+      return;
+
+    this.app.workspace
+      .getRightLeaf(false)
+      .setViewState({ type: this.VIEW_TYPE_CITATIONS });
+  }
+
+  openLeaf(): void {
+    (<WorkspaceExt>this.app.workspace).ensureSideLeaf(
+      this.VIEW_TYPE_CITATIONS,
+      this.VIEW_SIDE,
+      false,
+    );
   }
 
   /**

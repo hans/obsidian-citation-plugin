@@ -11,7 +11,7 @@ export default class CitationStatusBarItem {
     this.statusBarItem.addEventListener('click', (ev: any) => {
       // TODO doesn't work.
       if (!this.plugin.isLibraryLoading) {
-        this.plugin.createCitationsView(this.plugin.app.workspace.activeLeaf);
+        this.plugin.openLeaf();
       }
     });
 
