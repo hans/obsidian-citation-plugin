@@ -1057,7 +1057,7 @@ export default class CitationService {
   getBibliography(ids: string[]): [BibliographyOptions, string[]] {
     if (!this.library) return;
 
-    this.engine.updateItems(ids);
+    this.engine.updateItems(ids, true);
     return this.engine.makeBibliography();
   }
 }

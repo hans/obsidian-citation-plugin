@@ -258,8 +258,9 @@ declare module 'citeproc' {
      * the registry:
      *
      * @param   {string[]}  idList  A list of citation IDs to be citable.
+     * @param   {boolean}   noSort  Iff true, block sorting of these items. Output bibliographies will be ordered the same as the item sequence provided here.
      */
-    updateItems (idList: string[]): void
+    updateItems (idList: string[], noSort: boolean = false): void
     /**
      * Like its corollary above, the updateUncitedItems() method the registry
      * accepts a single argument, but refreshes the registry with a designated
