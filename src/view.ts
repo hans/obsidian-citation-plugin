@@ -1,4 +1,4 @@
-import { App, FileView, ItemView, TFile, View, WorkspaceLeaf } from 'obsidian';
+import { ItemView, TFile, WorkspaceLeaf } from 'obsidian';
 import * as _ from 'lodash';
 
 import type CitationPlugin from './main';
@@ -6,9 +6,6 @@ import type { Entry } from './types';
 import Citations from './ui/Citations.svelte';
 
 export class CitationsView extends ItemView {
-  // Leaf corresponding to note file
-  private file?: TFile;
-
   private plugin: CitationPlugin;
 
   private view: Citations;
