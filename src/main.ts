@@ -137,6 +137,15 @@ export default class CitationPlugin extends Plugin {
     });
 
     this.addCommand({
+      id: 'update-bib-data',
+      name: 'Update bib data',
+      hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'r' }],
+      callback: () => {
+        this.loadLibrary();
+      },
+    });
+
+    this.addCommand({
       id: 'insert-citation',
       name: 'Insert literature note link',
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'e' }],
