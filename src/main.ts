@@ -115,7 +115,10 @@ export default class CitationPlugin extends Plugin {
         };
 
         chokidar
-          .watch(this.settings.citationExportPath, watchOptions)
+          .watch(
+            this.resolveLibraryPath(this.settings.citationExportPath),
+            watchOptions,
+          )
           .on('change', () => {
             this.loadLibrary();
           });
