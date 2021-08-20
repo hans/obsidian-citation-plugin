@@ -189,7 +189,7 @@ describe('biblatex library', () => {
 });
 
 describe('biblatex regression tests', () => {
-  test('regression 7f9aefe (parser error handling)', () => {
+  test('regression 7f9aefe (non-fatal parser error handling)', () => {
     const load = () => {
       const library = loadBibLaTeXLibrary(
         loadBibLaTeXEntries('regression_7f9aefe.bib'),
@@ -199,6 +199,21 @@ describe('biblatex regression tests', () => {
     // Make sure we log warning
     const warnCallback = jest.fn();
     jest.spyOn(global.console, 'warn').mockImplementation(warnCallback);
+
+    expect(load).not.toThrowError();
+    expect(warnCallback.mock.calls.length).toBe(1);
+  });
+
+  test('regression fe15ef6 (fatal parser error handling)', () => {
+    const load = () => {
+      const library = loadBibLaTeXLibrary(
+        loadBibLaTeXEntries('regression_fe15ef6.bib'),
+      );
+    };
+
+    // Make sure we log warning
+    const warnCallback = jest.fn();
+    jest.spyOn(global.console, 'error').mockImplementation(warnCallback);
 
     expect(load).not.toThrowError();
     expect(warnCallback.mock.calls.length).toBe(1);

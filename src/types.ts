@@ -86,13 +86,26 @@ export function loadEntries(
   } else if (databaseType == 'biblatex') {
     const options: BibTeXParser.ParserOptions = {
       errorHandler: (err) => {
-        console.warn('Citation plugin: error loading BibLaTeX entry:', err);
+        console.warn(
+          'Citation plugin: non-fatal error loading BibLaTeX entry:',
+          err,
+        );
       },
     };
+
     const parsed = BibTeXParser.parse(
       databaseRaw,
       options,
     ) as BibTeXParser.Bibliography;
+
+    parsed.errors.forEach((error) => {
+      console.error(
+        `Citation plugin: fatal error loading BibLaTeX entry` +
+          ` (line ${error.line}, column ${error.column}):`,
+        error.message,
+      );
+    });
+
     libraryArray = parsed.entries;
   }
 
