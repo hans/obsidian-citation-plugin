@@ -6,5 +6,5 @@
 	"description": "Automatically search and insert citations from a Zotero library",
 	"author": "Jon Gauthier",
 	"authorUrl": "http://foldl.me",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }
