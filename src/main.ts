@@ -141,7 +141,7 @@ export default class CitationPlugin extends Plugin {
 
     this.addCommand({
       id: 'update-bib-data',
-      name: 'Update bib data',
+      name: 'Refresh citation database',
       hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'r' }],
       callback: () => {
         this.loadLibrary();
