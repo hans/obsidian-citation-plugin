@@ -127,6 +127,23 @@ function matchLibraryRender(
   expect(actual).toMatchObject(expected);
 }
 
+function loadBibLaTeXEntries(filename: string): EntryDataBibLaTeX[] {
+  const biblatexPath = path.join(__dirname, filename);
+  const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
+  return loadEntries(biblatex, 'biblatex') as EntryDataBibLaTeX[];
+}
+
+function loadBibLaTeXLibrary(entries: EntryDataBibLaTeX[]): Library {
+  return new Library(
+    Object.fromEntries(
+      entries.map((e: EntryDataBibLaTeX) => [
+        e.key,
+        new EntryBibLaTeXAdapter(e),
+      ]),
+    ),
+  );
+};
+
 const renderAdvancedTemplate = (
   loadLibrary: () => Library,
   citekey: string,
@@ -142,25 +159,13 @@ const renderAdvancedTemplate = (
 describe('biblatex library', () => {
   let entries: EntryDataBibLaTeX[];
   beforeEach(() => {
-    const biblatexPath = path.join(__dirname, 'library.bib');
-    const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
-    entries = loadEntries(biblatex, 'biblatex') as EntryDataBibLaTeX[];
+    entries = loadBibLaTeXEntries('library.bib');
   });
+  const loadLibrary = () => loadBibLaTeXLibrary(entries);
 
   test('loads', () => {
     expect(entries.length).toBe(5);
   });
-
-  function loadLibrary(): Library {
-    return new Library(
-      Object.fromEntries(
-        entries.map((e: EntryDataBibLaTeX) => [
-          e.key,
-          new EntryBibLaTeXAdapter(e),
-        ]),
-      ) as Record<string, Entry>,
-    );
-  }
 
   test('can support library', () => {
     const library = loadLibrary();
@@ -180,6 +185,23 @@ describe('biblatex library', () => {
   test('advanced template render', () => {
     const render = renderAdvancedTemplate(loadLibrary, 'aitchison2017you');
     expect(render).toBe('[[Aitchison, Laurence]], [[Lengyel, Máté]]');
+  });
+});
+
+describe('biblatex regression tests', () => {
+  test('regression 7f9aefe (parser error handling)', () => {
+    const load = () => {
+      const library = loadBibLaTeXLibrary(
+        loadBibLaTeXEntries('regression_7f9aefe.bib'),
+      );
+    };
+
+    // Make sure we log warning
+    const warnCallback = jest.fn();
+    jest.spyOn(global.console, 'warn').mockImplementation(warnCallback);
+
+    expect(load).not.toThrowError();
+    expect(warnCallback.mock.calls.length).toBe(1);
   });
 });
 
