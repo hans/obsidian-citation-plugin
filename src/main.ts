@@ -1,6 +1,9 @@
 import {
   FileSystemAdapter,
+  MarkdownPostProcessor,
+  MarkdownPostProcessorContext,
   MarkdownSourceView,
+  MarkdownPreviewView,
   MarkdownView,
   normalizePath,
   Plugin,
@@ -135,6 +138,9 @@ export default class CitationPlugin extends Plugin {
         });
       }),
     );
+
+    // Prepare preview leaf postprocessor
+    this.registerMarkdownPostProcessor(this.postProcessMarkdown.bind(this));
   }
 
   async init(): Promise<void> {
@@ -504,4 +510,37 @@ export default class CitationPlugin extends Plugin {
     return this.citationService.extractCitations(markdown);
   }
 
+  /**
+   * Post-process rendered Markdown content, replacing any detected citations
+   * with inline references from citeproc.
+   */
+  postProcessMarkdown(
+    el: HTMLElement,
+    ctx: MarkdownPostProcessorContext,
+  ): void {
+    // TODO trigger preview re-render when library loads.
+    if (!this.library) return;
+
+    // TODO handle chain of references
+    el.querySelectorAll('a.internal-link').forEach((link) => {
+      if (!(link instanceof HTMLAnchorElement)) return;
+
+      const match = link.pathname.match(/^\/(@(.+))$/);
+      if (match) {
+        const [, fullMatch, citekey] = match;
+        const entry = this.library.entries[citekey];
+        if (entry) {
+          // Render inline citation.
+          const citation = this.citationService.renderCitation(citekey, true);
+          if (citation.includes('NO_PRINTED_FORM')) {
+            // Error in generating citation. Quit.
+            return;
+          }
+
+          link.innerHTML = link.innerHTML.replace(fullMatch, citation);
+          link.addClass('citation-link');
+        }
+      }
+    });
+  }
 }
