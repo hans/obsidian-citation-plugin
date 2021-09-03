@@ -36,7 +36,7 @@ export default class CitationStatusBarItem {
     const activeLeaf: any = this.plugin.app.workspace.activeLeaf ?? null;
     const data = activeLeaf?.view?.data;
 
-    const citations = data == null ? [] : this.plugin.getCitations(data);
+    const citations = data == null ? [] : this.plugin.extractCitations(data);
     const label = citations.length == 1 ? 'citation' : 'citations';
     this.statusBarItem.setText(`${citations.length} ${label}`);
   }

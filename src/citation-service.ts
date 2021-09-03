@@ -1,6 +1,6 @@
 import * as CSL from 'citeproc';
 
-import type { Library } from './types';
+import type { Library, Entry } from './types';
 
 // TODO figure out locale string import ..
 // import localeEnUS from './resources/csl/locales/locales-en-US.xml';
@@ -1035,6 +1035,12 @@ export default class CitationService {
 
   library: Library;
 
+  /**
+   * Matches an Obsidian-style citation link, including the surrounding line
+   * content.
+   */
+  OBSIDIAN_CITATION_LINE_RE = /^.*\[\[?@([^\]]+?)(?:[#^]+[^\]]+)?\]\]?.*$/gm;
+
   constructor() {
     this.engine = new CSL.Engine(this.sys, cslChicagoStyle);
   }
@@ -1046,6 +1052,31 @@ export default class CitationService {
   getLocale(language: string): string {
     // TODO implement other locales
     return localeEnUS;
+  }
+
+  /**
+   * Extract a list of citations from the given Markdown string.
+   * Each element of the list is a 2-tuple consisting of an individual
+   * citation's corresponding `Entry` in the library (if it exists, or null),
+   * and the originating citation string including line context in the content.
+   */
+  extractCitations(content: string): [Entry, string][] {
+    if (!this.library) {
+      return null;
+    }
+
+    let results: [Entry, string][] = [];
+
+    // TODO support other citation formats
+    const matches = content.matchAll(this.OBSIDIAN_CITATION_LINE_RE);
+    results = results.concat(
+      [...matches].map((match) => {
+        const [line, citekey] = match;
+        return [this.library.entries[citekey], line] as [Entry, string];
+      }),
+    );
+
+    return results;
   }
 
   renderCitation(id: string): string {

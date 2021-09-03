@@ -41,7 +41,7 @@ export class CitationsView extends ItemView {
 
   async getCitations(content: string): Promise<[Entry, string, string[]][]> {
     const results = this.plugin
-      .getCitations(content)
+      .extractCitations(content)
       .filter(([entry]) => !!entry);
     const groupedResults = _.groupBy(results, ([entry]) => entry.id);
     const uniqueIds = Object.keys(groupedResults);

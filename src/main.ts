@@ -494,26 +494,8 @@ export default class CitationPlugin extends Plugin {
     );
   }
 
-  /**
-   * Extract a list of citations from the given Markdown string.
-   * Each element of the list is a 2-tuple consisting of an individual
-   * citation's corresponding `Entry` in the library (if it exists, or null),
-   * and the originating citation string including line context in the content.
-   */
-  getCitations(content: string): [Entry, string][] {
-    if (!this.library) {
-      return null;
-    }
-
-    // TODO support other citation formats
-    const matches = content.matchAll(
-      /^.*\[\[?@([^\]]+?)(?:[#^]+[^\]]+)?\]\]?.*$/gm,
-    );
-    const results: [Entry, string][] = [...matches].map((match) => {
-      const [line, citekey] = match;
-      return [this.library.entries[citekey], line] as [Entry, string];
-    });
-
-    return results;
+  extractCitations(markdown: string): [Entry, string][] {
+    return this.citationService.extractCitations(markdown);
   }
+
 }
