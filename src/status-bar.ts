@@ -21,13 +21,23 @@ export default class CitationStatusBarItem {
     this.plugin.registerEvent(
       this.plugin.app.workspace.on('codemirror', this.setupCodeMirror, this),
     );
+    this.plugin.registerEvent(
+      this.plugin.events.on('library-load-start', () =>
+        this.updateCitationCount(),
+      ),
+    );
+    this.plugin.registerEvent(
+      this.plugin.events.on('library-load-complete', () =>
+        this.updateCitationCount(),
+      ),
+    );
   }
 
   setupCodeMirror(cm: CodeMirror.Editor): void {
     cm.on('change', () => this.updateCitationCount.call(this));
   }
 
-  updateCitationCount(e: any): void {
+  updateCitationCount(e?: any): void {
     if (this.plugin.isLibraryLoading || !this.plugin.library) {
       this.statusBarItem.setText('loading citation database...');
       return;

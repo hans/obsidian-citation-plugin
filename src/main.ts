@@ -257,8 +257,9 @@ export default class CitationPlugin extends Plugin {
       );
 
       // Unload current library.
-      this.events.trigger('library-load-start');
       this.library = null;
+
+      this.events.trigger('library-load-start');
 
       return FileSystemAdapter.readLocalFile(filePath)
         .then((buffer) => {
@@ -296,8 +297,6 @@ export default class CitationPlugin extends Plugin {
             ),
           );
           this.citationService.library = this.library;
-
-          this.statusBarItem.updateCitationCount(null);
 
           console.debug(
             `Citation plugin: successfully loaded library with ${this.library.size} entries.`,
