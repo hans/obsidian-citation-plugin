@@ -24,6 +24,10 @@ export class CitationsView extends ItemView {
       this.app.workspace.on('codemirror', this.onCodeMirror, this),
     );
 
+    this.registerEvent(
+      this.plugin.events.on('library-load-complete', () => this.redraw()),
+    );
+
     console.log('citation view loaded');
   }
 
