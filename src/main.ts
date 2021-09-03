@@ -17,6 +17,7 @@ import {
   TemplateDelegate as Template,
 } from 'handlebars';
 
+import CitationEvents from './events';
 import CitationService from './citation-service';
 import {
   InsertCitationModal,
@@ -63,6 +64,8 @@ export default class CitationPlugin extends Plugin {
   private loadWorker = new WorkerManager(new LoadWorker(), {
     blockingChannel: true,
   });
+
+  events = new CitationEvents();
 
   loadErrorNotifier = new Notifier(
     'Unable to load citations. Please update Citations plugin settings.',
@@ -254,6 +257,7 @@ export default class CitationPlugin extends Plugin {
       );
 
       // Unload current library.
+      this.events.trigger('library-load-start');
       this.library = null;
 
       return FileSystemAdapter.readLocalFile(filePath)
@@ -298,6 +302,8 @@ export default class CitationPlugin extends Plugin {
           console.debug(
             `Citation plugin: successfully loaded library with ${this.library.size} entries.`,
           );
+
+          this.events.trigger('library-load-complete');
 
           return this.library;
         })

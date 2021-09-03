@@ -1,5 +1,6 @@
 /**
  * Hackily exposes undocumented parts of the Obsidian implementation for our use.
+ * Also extends some types to make our lives easier.
  */
 
 import { Vault, Workspace } from 'obsidian';
