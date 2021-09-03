@@ -1,9 +1,7 @@
 import {
   FileSystemAdapter,
-  MarkdownPostProcessor,
   MarkdownPostProcessorContext,
   MarkdownSourceView,
-  MarkdownPreviewView,
   MarkdownView,
   normalizePath,
   Plugin,
@@ -29,6 +27,7 @@ import {
   OpenNoteModal,
 } from './modals';
 import type { VaultExt, WorkspaceExt } from './obsidian-extensions.d';
+import { InlineCitationRenderer } from './postprocessors';
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import CitationStatusBarItem from './status-bar';
 import {
@@ -139,7 +138,6 @@ export default class CitationPlugin extends Plugin {
       }),
     );
 
-    // Prepare preview leaf postprocessor
     this.registerMarkdownPostProcessor(this.postProcessMarkdown.bind(this));
   }
 
@@ -505,41 +503,14 @@ export default class CitationPlugin extends Plugin {
     );
   }
 
-  extractCitations(markdown: string): [Entry, string][] {
-    return this.citationService.extractCitations(markdown);
+  /**
+   * Register Markdown postprocessors for the given rendered element.
+   */
+  postProcessMarkdown(el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+    ctx.addChild(new InlineCitationRenderer(el, this));
   }
 
-  /**
-   * Post-process rendered Markdown content, replacing any detected citations
-   * with inline references from citeproc.
-   */
-  postProcessMarkdown(
-    el: HTMLElement,
-    ctx: MarkdownPostProcessorContext,
-  ): void {
-    // TODO trigger preview re-render when library loads.
-    if (!this.library) return;
-
-    // TODO handle chain of references
-    el.querySelectorAll('a.internal-link').forEach((link) => {
-      if (!(link instanceof HTMLAnchorElement)) return;
-
-      const match = link.pathname.match(/^\/(@(.+))$/);
-      if (match) {
-        const [, fullMatch, citekey] = match;
-        const entry = this.library.entries[citekey];
-        if (entry) {
-          // Render inline citation.
-          const citation = this.citationService.renderCitation(citekey, true);
-          if (citation.includes('NO_PRINTED_FORM')) {
-            // Error in generating citation. Quit.
-            return;
-          }
-
-          link.innerHTML = link.innerHTML.replace(fullMatch, citation);
-          link.addClass('citation-link');
-        }
-      }
-    });
+  extractCitations(markdown: string): [Entry, string][] {
+    return this.citationService.extractCitations(markdown);
   }
 }
