@@ -1079,10 +1079,54 @@ export default class CitationService {
     return results;
   }
 
-  renderCitation(id: string): string {
+  /**
+   * Render an inline citation for the given citekey, e.g. `(Johnson 2008)`.
+   *
+   * If `narrative` is true, renders a narrative (`citet`-style) citation, e.g.
+   * `Johnson (2008)`.
+   */
+  renderCitation(id: string, narrative = false): string {
     if (!this.library) return;
 
-    return this.engine.makeCitationCluster([{ id: id }]);
+    // TODO, match the setup of citeproc and render all of these citations
+    // in sequence, in context.
+    // I don't see why it's necessary for our use cases -- unless we want to
+    // support "ibid" citations. But good to match the API spec.
+
+    if (narrative) {
+      // HACK, stolen from lewisacidic/simple-cite, to render narrative citations
+      // https://github.com/lewisacidic/simple-cite/blob/49a050f4fdb37f3a94b91423e0929ca3640d6578/src/citation.js#L15
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore: the types for this function don't match implementation .. sigh.
+      const authorOnlyItem: CSLItem = {
+        citationItems: [{ id: id, 'author-only': true }],
+      };
+
+      const authorOnlyCitation = this.engine.previewCitationCluster(
+        authorOnlyItem,
+        [],
+        [],
+        'text',
+      );
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore: the types for this function don't match implementation .. sigh.
+      const authorSuppressItem: CSLItem = {
+        citationItems: [{ id: id, 'suppress-author': true }],
+      };
+
+      const authorSuppressCitation = this.engine.previewCitationCluster(
+        authorSuppressItem,
+        [],
+        [],
+        'text',
+      );
+
+      return [authorOnlyCitation, authorSuppressCitation].join(' ').trim();
+    } else {
+      return this.engine.makeCitationCluster([{ id: id }]);
+    }
   }
 
   renderBibliography(ids: string[]): [BibliographyOptions, string[]] {
