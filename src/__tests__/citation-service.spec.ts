@@ -31,13 +31,13 @@ describe('render biblatex citation', () => {
   });
 
   test('renders', () => {
-    expect(svc.getCitation('alexandrescu2006factored')).toBe(
+    expect(svc.renderCitation('alexandrescu2006factored')).toBe(
       '(Alexandrescu and Kirchhoff 2006)',
     );
 
-    const [opts, bib] = svc.getBibliography([
-      'alexandrescu2006factored',
+    const [opts, bib] = svc.renderBibliography([
       'abnar2019blackbox',
+      'alexandrescu2006factored',
     ]);
     expect(bib).toStrictEqual([
       '  <div class="csl-entry">Abnar, Samira, Lisa Beinborn, Rochelle Choenni, and Willem Zuidema. 2019. “Blackbox Meets Blackbox: Representational Similarity and Stability Analysis of Neural Language Models and Brains.” <i>Arxiv:1906.01539 [Cs, q-Bio]</i>. http://arxiv.org/abs/1906.01539.</div>\n',

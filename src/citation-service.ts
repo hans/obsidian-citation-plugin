@@ -1048,13 +1048,13 @@ export default class CitationService {
     return localeEnUS;
   }
 
-  getCitation(id: string): string {
+  renderCitation(id: string): string {
     if (!this.library) return;
 
     return this.engine.makeCitationCluster([{ id: id }]);
   }
 
-  getBibliography(ids: string[]): [BibliographyOptions, string[]] {
+  renderBibliography(ids: string[]): [BibliographyOptions, string[]] {
     if (!this.library) return;
 
     this.engine.updateItems(ids, true);

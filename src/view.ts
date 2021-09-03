@@ -47,7 +47,7 @@ export class CitationsView extends ItemView {
     const uniqueIds = Object.keys(groupedResults);
 
     // Render bibliography strings with citation service.
-    const [, bibStrings] = this.plugin.citationService.getBibliography(
+    const [, bibStrings] = this.plugin.citationService.renderBibliography(
       uniqueIds,
     );
     const bibStringMap = Object.fromEntries(_.zip(uniqueIds, bibStrings));
