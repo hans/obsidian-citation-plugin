@@ -27,7 +27,7 @@ import {
   OpenNoteModal,
 } from './modals';
 import type { VaultExt, WorkspaceExt } from './obsidian-extensions.d';
-import { InlineCitationRenderer } from './postprocessors';
+import { InlineCitationRenderer, BibliographyRenderer } from './postprocessors';
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import CitationStatusBarItem from './status-bar';
 import {
@@ -508,6 +508,24 @@ export default class CitationPlugin extends Plugin {
    */
   postProcessMarkdown(el: HTMLElement, ctx: MarkdownPostProcessorContext) {
     ctx.addChild(new InlineCitationRenderer(el, this));
+
+    // Optionally add bibliography renderer
+    el.querySelectorAll('pre > code').forEach((codeblock) => {
+      const codeblockEl = codeblock as HTMLElement;
+      if (codeblockEl.classList.contains('language-bibliography')) {
+        const replacement = document.createElement('div');
+        // NB we know a `pre` element is directly above. replace that.
+        codeblockEl.parentElement.replaceWith(replacement);
+        ctx.addChild(
+          new BibliographyRenderer(
+            ctx,
+            codeblockEl.innerText,
+            replacement,
+            this,
+          ),
+        );
+      }
+    });
   }
 
   extractCitations(markdown: string): [Entry, string][] {
