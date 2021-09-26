@@ -17,8 +17,14 @@
 
   afterUpdate(() => {
     // Create icons via Obsidian API
-    fishAll('.zoteroLinkIcon').forEach((el) => {
+    fishAll('.zoteroPopUpIcon').forEach((el) => {
       setIcon(el, 'popup-open');
+    });
+    fishAll('.zoteroPDFIcon').forEach((el) => {
+      setIcon(el, 'pdf-file');
+    });
+    fishAll('.zoteroZotIcon').forEach((el) => {
+      setIcon(el, 'sheets-in-box');
     });
 
     const sortOrderButton = fish('#zoteroButtonSortOrder');
@@ -172,11 +178,11 @@ ul#citations-list li {
           {/each}
         </div>
         <div class="zoteroLinks">
-          <button class="zoteroLinkIcon"></button>
+          <button class="zoteroPopUpIcon mod-clickable" aria-label="Open Pop-Up" aria-label-position="bottom"></button>
           {#if entry.pdfs?.length > 0}
-            <button on:click={() => openPDF(entry)}>PDF</button>
+            <button on:click={() => openPDF(entry)} class="zoteroPDFIcon mod-clickable" aria-label="Open PDF" aria-label-position="bottom">PDF</button>
           {/if}
-          <button on:click={() => open(entry.zoteroSelectURI)}>Zot</button>
+          <button on:click={() => open(entry.zoteroSelectURI)} class="zoteroZotIcon mod-clickable" aria-label="Open in Zotero" aria-label-position="bottom">Zot</button>
         </div>
       </div>
     {/each}
