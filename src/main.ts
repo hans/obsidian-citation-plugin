@@ -12,6 +12,7 @@ import {
 import * as path from 'path';
 import * as chokidar from 'chokidar';
 import type CodeMirror from 'codemirror';
+import { addIcons } from './view';
 
 import {
   compile as compileTemplate,

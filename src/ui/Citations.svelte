@@ -34,6 +34,10 @@
   padding: 0 8px;
 }
 
+.nav-header{
+  display: contents;
+}
+
 h3.title {
   color: var(--color-text-title);
   font-size: 1.5em;
@@ -51,21 +55,55 @@ ul#citations-list li {
   margin: 10px 0;
 }
 
+.tree-item-self{
+  width: 100%;
+  display: flex;
+  white-space: wrap;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  align-items: flex-start;
+  padding: 2px 6px 2px 20px;
+}
+
+.tree-item-inner.citation-item-inner{
+  font-size: 16px;
+  white-space: initial;
+  line-height: 1.4em;
+}
+
+.search-result-file-match {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .search-result-file-matches {
   border-bottom: none;
   margin-bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .zoteroLinks {
-  padding: 0 6px 0 25px;
+  display: flex;
+  padding: 0 6px 15px 25px;
   border-bottom: 1px solid var(--background-modifier-border);
   margin-bottom: 15px;
 }
 
 .zoteroLinks button {
-  display: inline-block;
+  display: inline-flex;
   margin-right: 3px;
-  padding: 6px;
+  padding: 4px 14px;
+  border-radius: 6px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--text-accent);
+  border: 1px solid var(--background-modifier-border);
 }
 
 /*
@@ -121,7 +159,7 @@ ul#citations-list li {
       <div class="tree-item">
         <div class="tree-item-self">
           <div class="collapse-icon"></div>
-          <div class="tree-item-inner">
+          <div class="tree-item-inner citation-item-inner">
             {@html citation}
           </div>
           <div class="tree-item-flair-outer">
