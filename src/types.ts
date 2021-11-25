@@ -172,7 +172,7 @@ export abstract class Entry {
 
   public get note(): string {
     return this._note
-      ?.map((el) => el.replace(/(zotero:\/\/.+)/g, '[Link]($1)'))
+      ?.map((el) => el.replace(/<a\s+href="([^"]+)">([^<]*)<\/a>/g, '[$2]($1)'))
       .join('\n\n');
   }
 
