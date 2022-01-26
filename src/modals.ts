@@ -92,7 +92,7 @@ class SearchModal extends FuzzySuggestModal<Entry> {
   }
 
   getItemText(item: Entry): string {
-    return `${item.title} ${item.authorString} ${item.year}`;
+    return `${item.title} ${item.authorString} ${item.year} ${item.id}`;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
