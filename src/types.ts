@@ -27,6 +27,7 @@ export const TEMPLATE_VARIABLES = {
   publisher: '',
   publisherPlace: 'Location of publisher',
   title: '',
+  titleShort: '',
   URL: '',
   year: 'Publication year',
   zoteroSelectURI: 'URI to open the reference in Zotero',
@@ -60,6 +61,7 @@ export class Library {
       publisher: entry.publisher,
       publisherPlace: entry.publisherPlace,
       title: entry.title,
+      titleShort: entry.titleShort,
       URL: entry.URL,
       year: entry.year?.toString(),
       zoteroSelectURI: entry.zoteroSelectURI,
@@ -148,6 +150,7 @@ export abstract class Entry {
    */
   public abstract page?: string;
   public abstract title?: string;
+  public abstract titleShort?: string;
   public abstract URL?: string;
 
   public abstract eventPlace?: string;
@@ -222,6 +225,7 @@ export interface EntryDataCSL {
   publisher?: string;
   'publisher-place'?: string;
   title?: string;
+  'title-short'?: string;
   URL?: string;
 }
 
@@ -294,6 +298,10 @@ export class EntryCSLAdapter extends Entry {
 
   get title() {
     return this.data.title;
+  }
+
+  get titleShort() {
+    return this.data['title-short'];
   }
 
   get URL() {
