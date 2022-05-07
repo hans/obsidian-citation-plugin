@@ -28,6 +28,5 @@ jobs:
         artifacts: "main.js,manifest.json,styles.css"
         bodyFile: "body.md"
         token: ${{ secrets.GITHUB_TOKEN }}
-        draft: true
         allowUpdates: true
         artifactErrorsFailBuild: true
