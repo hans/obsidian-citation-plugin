@@ -18,7 +18,8 @@ jobs:
       run: >
         git config --global url."https://github.com/".insteadOf ssh://git@github.com/
     - run: npm run build 
-    - run: git show -s --format=%B > body.md
+    - run: npm test
+    - run: git tag -l --format='%(contents)' > body.md
     - name: Create release
       uses: ncipollo/release-action@v1
       with: 
