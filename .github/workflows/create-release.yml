@@ -17,6 +17,7 @@ jobs:
     - name: Reconfigure git to use HTTP authentication
       run: >
         git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+    - run: npm ci --no-optional
     - run: npm run build 
     - run: npm test
     - run: git tag -l --format='%(contents)' > body.md
