@@ -30,6 +30,7 @@ export class CitationsPluginSettings {
 
   markdownCitationTemplate = '[@{{citekey}}]';
   alternativeMarkdownCitationTemplate = '@{{citekey}}';
+  searchKeyOrdering = 'title,authorString,year';
 }
 
 export class CitationSettingTab extends PluginSettingTab {
@@ -237,6 +238,19 @@ export class CitationSettingTab extends PluginSettingTab {
       .setName('Markdown secondary citation template')
       .addText((input) =>
         this.buildValueInput(input, 'alternativeMarkdownCitationTemplate'),
+      );
+
+    containerEl.createEl('h3', { text: 'Search settings' });
+
+    new Setting(containerEl) 
+      .setName('Search Fields')
+      .addText((input) => 
+        this.buildValueInput(input, 'searchKeyOrdering'),
+      )
+      .setDesc(
+        'Comma-separated list of fields to index for search. Prioritization is controlled by the ordering (e.g., "citekey,title" would prioritize items whose ' +
+        'citekeys match the search string over papers whose title matches the search string). Fields listed under the template settings can be used.'
+        
       );
   }
 

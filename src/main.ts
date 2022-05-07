@@ -81,6 +81,7 @@ export default class CitationPlugin extends Plugin {
       'literatureNoteContentTemplate',
       'markdownCitationTemplate',
       'alternativeMarkdownCitationTemplate',
+      'searchKeyOrdering',
     ];
     toLoad.forEach((setting) => {
       if (setting in loadedSettings) {

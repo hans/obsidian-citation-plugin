@@ -39,15 +39,9 @@ export class Library {
     return Object.keys(this.entries).length;
   }
 
-  /**
-   * For the given citekey, find the corresponding `Entry` and return a
-   * collection of template variable assignments.
-   */
-  getTemplateVariablesForCitekey(citekey: string): Record<string, any> {
-    const entry: Entry = this.entries[citekey];
+  getTemplateVariables(entry: Entry): Record<string, any> {
     const shortcuts = {
-      citekey: citekey,
-
+      citekey: entry.id,
       abstract: entry.abstract,
       authorString: entry.authorString,
       containerTitle: entry.containerTitle,
@@ -65,7 +59,16 @@ export class Library {
       zoteroSelectURI: entry.zoteroSelectURI,
     };
 
-    return { entry: entry.toJSON(), ...shortcuts };
+    return { entry: entry.toJSON(), ...shortcuts};
+  }
+
+  /**
+   * For the given citekey, find the corresponding `Entry` and return a
+   * collection of template variable assignments.
+   */
+  getTemplateVariablesForCitekey(citekey: string): Record<string, any> {
+    const entry: Entry = this.entries[citekey];
+    return this.getTemplateVariables(entry);
   }
 }
 

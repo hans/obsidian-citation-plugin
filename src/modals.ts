@@ -91,8 +91,34 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     return Object.values(this.plugin.library.entries);
   }
 
+  getSearchKeyOrdering(): string[] {
+    return this.plugin.settings.searchKeyOrdering.split(',').map((key) => key.trim());
+  }
+
   getItemText(item: Entry): string {
-    return `${item.title} ${item.authorString} ${item.year} ${item.id}`;
+    const templateVars = this.plugin.library.getTemplateVariables(item);
+    const itemText = this.getSearchKeyOrdering().map((key) => templateVars[key]).join(' ');
+    return itemText;
+  }
+
+  getItemTextOffsetForKey(item: Entry, key: string): number | null {
+    const templateVars = this.plugin.library.getTemplateVariables(item);
+    let offset = 0;
+    let found = false;
+    for (let k of this.getSearchKeyOrdering()) {
+      if (k == key) {
+        found = true;
+        break;
+      }
+
+      offset += `${templateVars[k]}`.length + 1;
+    }
+
+    if (found) {
+      return offset;
+    } else {
+      return null;
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -109,7 +135,7 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     const titleEl = container.createEl('span', {
       cls: 'zoteroTitle',
     });
-    container.createEl('span', { cls: 'zoteroCitekey', text: entry.id });
+    const citekeyEl = container.createEl('span', { cls: 'zoteroCitekey' });
 
     const authorsCls = entry.authorString
       ? 'zoteroAuthors'
@@ -117,21 +143,25 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     const authorsEl = container.createEl('span', {
       cls: authorsCls,
     });
+    const templateVars = this.plugin.library.getTemplateVariables(entry);
 
     // Prepare to highlight string matches for each part of the search item.
     // Compute offsets of each rendered element's content within the string
     // returned by `getItemText`.
     const allMatches = match.match.matches;
-    const authorStringOffset = 1 + entryTitle.length;
 
     // Filter a match list to contain only the relevant matches for a given
     // substring, and with match indices shifted relative to the start of that
     // substring
     const shiftMatches = (
+      key: string,
       matches: SearchMatches,
-      start: number,
-      end: number,
     ) => {
+      const start = this.getItemTextOffsetForKey(entry, key);
+      if (start === null) {
+        return [];
+      }
+      const end = start + `${templateVars[key]}`.length;
       return matches
         .map((match: SearchMatchPart) => {
           const [matchStart, matchEnd] = match;
@@ -150,17 +180,20 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     renderMatches(
       titleEl,
       entryTitle,
-      shiftMatches(allMatches, 0, entryTitle.length),
+      shiftMatches('title', allMatches),
     );
+    if (entry.id) {
+      renderMatches(
+        citekeyEl, 
+        entry.id,
+        shiftMatches('id', allMatches),
+      );
+    }
     if (entry.authorString) {
       renderMatches(
         authorsEl,
         entry.authorString,
-        shiftMatches(
-          allMatches,
-          authorStringOffset,
-          authorStringOffset + entry.authorString.length,
-        ),
+        shiftMatches('authorString', allMatches),
       );
     }
   }
