@@ -1,0 +1,30 @@
+name: Releases
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - name: Reconfigure git to use HTTP authentication
+      run: >
+        git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+    - run: npm run build 
+    - run: git show -s --format=%B > body.md
+    - name: Create release
+      uses: ncipollo/release-action@v1
+      with: 
+        artifacts: "main.js,manifest.json,styles.css"
+        bodyFile: "body.md"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        draft: true
+        allowUpdates: true
+        artifactErrorsFailBuild: true
