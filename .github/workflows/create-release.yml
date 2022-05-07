@@ -21,6 +21,7 @@ jobs:
     - run: npm run build 
     - run: npm test
     - run: git tag -l --format='%(contents)' > body.md
+    - run: ls
     - name: Create release
       uses: ncipollo/release-action@v1
       with: 
