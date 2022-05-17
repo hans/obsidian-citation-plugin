@@ -205,6 +205,17 @@ export class CitationSettingTab extends PluginSettingTab {
         href: 'http://www.foldl.me/obsidian-citation-plugin/classes/entry.html',
       }),
       createSpan({ text: " for information on this object's structure." }),
+      createSpan({ text: ' Additionally, some Handlebars helper are available to work with ' }),
+      createEl('a', {
+        text: 'strings',
+        href: 'https://github.com/helpers/handlebars-helpers#string',
+      }),
+      createSpan({ text: ' and ' }),
+      createEl('a', {
+        text: 'URLs',
+        href: 'https://github.com/helpers/handlebars-helpers#url',
+      }),
+      createSpan({ text: '.' }),
     );
 
     containerEl.createEl('h3', { text: 'Literature note templates' });
