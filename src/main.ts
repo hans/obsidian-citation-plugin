@@ -9,11 +9,17 @@ import {
 import * as path from 'path';
 import * as chokidar from 'chokidar';
 import * as CodeMirror from 'codemirror';
-
+import * as Handlebars from 'handlebars';
 import {
   compile as compileTemplate,
   TemplateDelegate as Template,
 } from 'handlebars';
+
+import helpers from 'handlebars-helpers';
+var hbsHelpers = helpers(["string", "url"])
+for (const [helperName, helperFunc] of Object.entries(hbsHelpers)) {
+  Handlebars.registerHelper(helperName, helperFunc)
+}
 
 import {
   InsertCitationModal,
