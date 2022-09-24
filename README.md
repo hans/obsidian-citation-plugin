@@ -69,6 +69,7 @@ MIT License.
 - Jon Gauthier ([hans](https://github.com/hans))
 - [raineszm](https://github.com/raineszm)
 - [Luke Murray](https://lukesmurray.com/)
+- [valmaev](https://github.com/valmaev)
 
 [1]: https://github.com/citation-style-language/schema#csl-json-schema
 [2]: https://retorque.re/zotero-better-bibtex/
