@@ -128,10 +128,11 @@ function matchLibraryRender(
   expect(actual).toMatchObject(expected);
 }
 
-function loadBibLaTeXEntries(filename: string): EntryDataBibLaTeX[] {
+function loadBibLaTeXEntries(filename: string, fixedCase: boolean = false): EntryDataBibLaTeX[] {
   const biblatexPath = path.join(__dirname, filename);
   const biblatex = fs.readFileSync(biblatexPath, 'utf-8');
-  return loadEntries(biblatex, 'biblatex') as EntryDataBibLaTeX[];
+  return loadEntries(biblatex, 'biblatex',
+                     {fixedCase: fixedCase}) as EntryDataBibLaTeX[];
 }
 
 function loadBibLaTeXLibrary(entries: EntryDataBibLaTeX[]): Library {
@@ -162,7 +163,9 @@ describe('biblatex library', () => {
   beforeEach(() => {
     entries = loadBibLaTeXEntries('library.bib');
   });
-  const loadLibrary = () => loadBibLaTeXLibrary(entries);
+  const loadLibrary = () => {
+    return loadBibLaTeXLibrary(entries);
+  }
 
   test('loads', () => {
     expect(entries.length).toBe(5);
@@ -187,6 +190,14 @@ describe('biblatex library', () => {
     const render = renderAdvancedTemplate(loadLibrary, 'aitchison2017you');
     expect(render).toBe('[[Aitchison, Laurence]], [[Lengyel, Máté]]');
   });
+
+  test('custom casing', () => {
+    const entries2 = loadBibLaTeXEntries('library.bib', true);
+    const library2 = loadBibLaTeXLibrary(entries);
+    
+    console.log(library2.entries['aitchison2017you'].titleShort);
+    console.log(loadLibrary().entries['aitchison2017you'].titleShort);
+  })
 });
 
 describe('biblatex regression tests', () => {
@@ -219,6 +230,7 @@ describe('biblatex regression tests', () => {
     expect(load).not.toThrowError();
     expect(warnCallback.mock.calls.length).toBe(1);
   });
+
 });
 
 describe('csl library', () => {

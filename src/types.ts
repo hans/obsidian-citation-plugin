@@ -71,6 +71,11 @@ export class Library {
   }
 }
 
+export interface LoadOptions {
+  // TODO document
+  fixedCase: boolean;
+}
+
 /**
  * Load reference entries from the given raw database data.
  *
@@ -80,13 +85,14 @@ export class Library {
 export function loadEntries(
   databaseRaw: string,
   databaseType: DatabaseType,
+  options: LoadOptions = { fixedCase: false }
 ): EntryData[] {
   let libraryArray: EntryData[];
 
   if (databaseType == 'csl-json') {
     libraryArray = JSON.parse(databaseRaw);
   } else if (databaseType == 'biblatex') {
-    const options: BibTeXParser.ParserOptions = {
+    const bibOptions: BibTeXParser.ParserOptions = {
       errorHandler: (err) => {
         console.warn(
           'Citation plugin: non-fatal error loading BibLaTeX entry:',
@@ -95,9 +101,13 @@ export function loadEntries(
       },
     };
 
+    if (options.fixedCase) {
+      bibOptions.sentenceCase = ["eng"];//false;
+    }
+
     const parsed = BibTeXParser.parse(
       databaseRaw,
-      options,
+      bibOptions,
     ) as BibTeXParser.Bibliography;
 
     parsed.errors.forEach((error) => {
