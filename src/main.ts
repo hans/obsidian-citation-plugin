@@ -392,7 +392,7 @@ export default class CitationPlugin extends Plugin {
           linkText = `[[${title}]]`;
         }
 
-        this.editor.replaceRange(linkText, this.editor.getCursor());
+        this.editor.replaceSelection(linkText);
       })
       .catch(console.error);
   }
