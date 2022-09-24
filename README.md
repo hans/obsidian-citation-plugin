@@ -45,6 +45,7 @@ You can set up your own template for both the title and content of literature no
 * {{publisher}}
 * {{publisherPlace}}
 * {{title}}
+* {{titleShort}}
 * {{URL}}
 * {{year}}
 * {{zoteroSelectURI}}
