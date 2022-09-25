@@ -57,7 +57,7 @@
 .zoteroCitekey {
   color: #555;
   font-size: 13px;
-  font-family: monospace;
+  font-family: var(--font-monospace), monospace;
   display: inline-block;
   margin-right: 5px;
   padding-right: 5px;
