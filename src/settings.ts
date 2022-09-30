@@ -23,8 +23,8 @@ export class CitationsPluginSettings {
   literatureNoteFolder = 'Reading notes';
   literatureNoteContentTemplate: string =
     '---\n' +
-    'title: {{title}}\n' +
-    'authors: {{authorString}}\n' +
+    'title: "{{title}}"\n' +
+    'authors: "{{authorString}}"\n' +
     'year: {{year}}\n' +
     '---\n\n';
 
