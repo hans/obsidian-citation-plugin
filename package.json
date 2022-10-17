@@ -48,8 +48,10 @@
   },
   "dependencies": {
     "@retorquere/bibtex-parser": "^6.3.9",
+    "@types/handlebars-helpers": "^0.5.3",
     "chokidar": "^3.5.0",
     "handlebars": "^4.7.6",
+    "handlebars-helpers": "^0.10.0",
     "open": "^7.3.0",
     "promise-worker": "^2.0.1"
   },
