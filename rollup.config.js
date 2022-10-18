@@ -29,6 +29,20 @@ export default {
       "require('fs')": "require('original-fs')",
     }),
 
+    /*
+     * Don't include create-frame because it has a silly lazy cache 
+     * hack that breaks the build.
+     */
+    replace({
+      include: [
+        "node_modules/handlebars-helpers/lib/misc.js",
+        "node_modules/handlebars-helpers/lib/utils/utils.js",
+      ],
+
+      "require('handlebars-helper-create-frame')": "null",
+      "require('create-frame')": "null",
+    }),
+
     typescript(),
     nodeResolve({ browser: true }),
     commonjs({ ignore: ['original-fs'] }),

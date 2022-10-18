@@ -212,6 +212,7 @@ export class CitationSettingTab extends PluginSettingTab {
       "string": "strings",
       "path": "paths",
       "array": "arrays",
+      "regex": "regular expressions",
       "url": "URLs",
     };
     const helperList: HTMLElement[] = [];
