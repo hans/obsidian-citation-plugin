@@ -205,18 +205,28 @@ export class CitationSettingTab extends PluginSettingTab {
         href: 'http://www.foldl.me/obsidian-citation-plugin/classes/entry.html',
       }),
       createSpan({ text: " for information on this object's structure." }),
-      createSpan({ text: ' Additionally, some Handlebars helper are available to work with ' }),
-      createEl('a', {
-        text: 'strings',
-        href: 'https://github.com/helpers/handlebars-helpers#string',
-      }),
-      createSpan({ text: ' and ' }),
-      createEl('a', {
-        text: 'URLs',
-        href: 'https://github.com/helpers/handlebars-helpers#url',
-      }),
-      createSpan({ text: '.' }),
+      createSpan({ text: ' Additionally, some Handlebars helpers are available to work with ' })
     );
+
+    const helperLabels = {
+      "string": "strings",
+      "path": "paths",
+      "array": "arrays",
+      "url": "URLs",
+    };
+    const helperList: HTMLElement[] = [];
+    Object.entries(helperLabels).forEach(([helper, label]) => {
+      const helperItem = createEl('a', {
+        text: `${label}`,
+        href: `https://github.com/helpers/handlebars-helpers#${helper}`,
+      })
+      helperList.push(helperItem);
+      helperList.push(createSpan({ text: ', ' }));
+    });
+    helperList.pop();
+    helperList.splice(helperList.length - 1, 0, createSpan({ text: ' and ' }));
+    helperList.push(createSpan({ text: '.' }));
+    templateEntryInstructionsEl.append(...helperList);
 
     containerEl.createEl('h3', { text: 'Literature note templates' });
 

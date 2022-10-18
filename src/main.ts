@@ -18,7 +18,7 @@ import {
 
 import CitationEvents from './events';
 import helpers from 'handlebars-helpers';
-var hbsHelpers = helpers(["string", "url"])
+var hbsHelpers = helpers(["array", "path", "string", "url"])
 for (const [helperName, helperFunc] of Object.entries(hbsHelpers)) {
   Handlebars.registerHelper(helperName, helperFunc)
 }
