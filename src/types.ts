@@ -31,6 +31,7 @@ export const TEMPLATE_VARIABLES = {
   URL: '',
   year: 'Publication year',
   zoteroSelectURI: 'URI to open the reference in Zotero',
+  keywords: 'A list of keywords from Zotero',
 };
 
 export class Library {
@@ -57,6 +58,7 @@ export class Library {
       eprinttype: entry.eprinttype,
       eventPlace: entry.eventPlace,
       note: entry.note,
+      keywords: entry.keywords,
       page: entry.page,
       publisher: entry.publisher,
       publisherPlace: entry.publisherPlace,
@@ -190,6 +192,12 @@ export abstract class Entry {
     return this._note
       ?.map((el) => el.replace(/(zotero:\/\/.+)/g, '[Link]($1)'))
       .join('\n\n');
+  }
+
+  protected _keywords?: string[];
+
+  public get keywords(): string {
+    return this._keywords?.join(', ');
   }
 
   /**
@@ -342,6 +350,7 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   year: '_year',
   publisher: 'publisher',
   note: '_note',
+  keywords: '_keywords',
 };
 
 // BibLaTeX parser returns arrays of property values (allowing for repeated
@@ -385,6 +394,7 @@ export class EntryBibLaTeXAdapter extends Entry {
   URL?: string;
   _year?: string;
   _note?: string[];
+  _keywords?: string[];
 
   constructor(private data: EntryDataBibLaTeX) {
     super();
