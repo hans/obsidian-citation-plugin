@@ -1,4 +1,5 @@
 import {
+  Editor,
   FileSystemAdapter,
   ItemView,
   MarkdownSourceView,
@@ -15,7 +16,6 @@ import {
   compile as compileTemplate,
   TemplateDelegate as Template,
 } from 'handlebars';
-
 
 import CitationEvents from './events';
 import {
@@ -64,20 +64,8 @@ export default class CitationPlugin extends Plugin {
     'Unable to access literature note. Please check that the literature note folder exists, or update the Citations plugin settings.',
   );
 
-  get editor(): CodeMirror.Editor {
-    const view = this.app.workspace.getActiveViewOfType(ItemView);
-
-    if (view.getViewType() == 'canvas') {
-      if (this.app.workspace.activeEditor !== undefined) {
-        const canvasActiveEditor = this.app.workspace.activeEditor;
-        return canvasActiveEditor.editor;
-      }
-    }
-
-    if (!(view instanceof MarkdownView)) return null;
-
-    const sourceView = view.sourceMode;
-    return (sourceView as MarkdownSourceView).cmEditor;
+  get editor(): Editor {
+    return this.app.workspace.activeEditor.editor;
   }
 
   async loadSettings(): Promise<void> {
