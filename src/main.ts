@@ -1,4 +1,5 @@
 import {
+  EditorPosition,
   FileSystemAdapter,
   MarkdownSourceView,
   MarkdownView,
@@ -392,7 +393,15 @@ export default class CitationPlugin extends Plugin {
           linkText = `[[${title}]]`;
         }
 
-        this.editor.replaceSelection(linkText);
+        const currentPosition = this.editor.getCursor();
+        this.editor.replaceRange(linkText, currentPosition);
+
+        const newPosition: EditorPosition = {
+          line: currentPosition.line,
+          ch: currentPosition.ch + linkText.length,
+        };
+
+        this.editor.setCursor(newPosition);
       })
       .catch(console.error);
   }
@@ -415,6 +424,14 @@ export default class CitationPlugin extends Plugin {
       : this.getMarkdownCitationForCitekey;
     const citation = func.bind(this)(citekey);
 
-    this.editor.replaceRange(citation, this.editor.getCursor());
+    const currentPosition = this.editor.getCursor();
+    this.editor.replaceRange(citation, currentPosition);
+
+    const newPosition: EditorPosition = {
+      line: currentPosition.line,
+      ch: currentPosition.ch + citation.length,
+    };
+
+    this.editor.setCursor(newPosition);
   }
 }
