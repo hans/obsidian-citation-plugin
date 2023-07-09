@@ -1,5 +1,6 @@
 import {
   FileSystemAdapter,
+  ItemView,
   MarkdownSourceView,
   MarkdownView,
   normalizePath,
@@ -64,7 +65,15 @@ export default class CitationPlugin extends Plugin {
   );
 
   get editor(): CodeMirror.Editor {
-    const view = this.app.workspace.activeLeaf.view;
+    const view = this.app.workspace.getActiveViewOfType(ItemView);
+
+    if (view.getViewType() == 'canvas') {
+      if (this.app.workspace.activeEditor !== undefined) {
+        const canvasActiveEditor = this.app.workspace.activeEditor;
+        return canvasActiveEditor.editor;
+      }
+    }
+
     if (!(view instanceof MarkdownView)) return null;
 
     const sourceView = view.sourceMode;
@@ -392,7 +401,7 @@ export default class CitationPlugin extends Plugin {
           linkText = `[[${title}]]`;
         }
 
-        this.editor.replaceSelection(linkText);
+        this.editor.replaceRange(linkText, this.editor.getCursor());
       })
       .catch(console.error);
   }
