@@ -1,5 +1,6 @@
 import {
   App,
+  EventRef,
   FuzzyMatch,
   FuzzySuggestModal,
   Notice,
@@ -23,9 +24,8 @@ class SearchModal extends FuzzySuggestModal<Entry> {
   limit = 50;
 
   loadingEl: HTMLElement;
-  loadingCheckerHandle: NodeJS.Timeout;
-  // How frequently should we check whether the library is still loading?
-  loadingCheckInterval = 250;
+
+  eventRefs: EventRef[];
 
   constructor(app: App, plugin: CitationPlugin) {
     super(app);
@@ -47,10 +47,17 @@ class SearchModal extends FuzzySuggestModal<Entry> {
   onOpen() {
     super.onOpen();
 
-    this.checkLoading();
-    this.loadingCheckerHandle = setInterval(() => {
-      this.checkLoading();
-    }, this.loadingCheckInterval);
+    this.eventRefs = [
+      this.plugin.events.on('library-load-start', () => {
+        this.setLoading(true);
+      }),
+
+      this.plugin.events.on('library-load-complete', () => {
+        this.setLoading(false);
+      }),
+    ];
+
+    this.setLoading(this.plugin.isLibraryLoading);
 
     // Don't immediately register keyevent listeners. If the modal was triggered
     // by an "Enter" keystroke (e.g. via the Obsidian command dialog), this event
@@ -58,29 +65,11 @@ class SearchModal extends FuzzySuggestModal<Entry> {
     setTimeout(() => {
       this.inputEl.addEventListener('keydown', (ev) => this.onInputKeydown(ev));
       this.inputEl.addEventListener('keyup', (ev) => this.onInputKeyup(ev));
-    }, 50);
+    }, 200);
   }
 
   onClose() {
-    if (this.loadingCheckerHandle) {
-      clearInterval(this.loadingCheckerHandle);
-    }
-  }
-
-  /**
-   * Check if the library is currently being loaded. If so, display animation
-   * and disable input. Otherwise hide animation and enable input.
-   */
-  checkLoading() {
-    if (this.plugin.isLibraryLoading) {
-      this.loadingEl.removeClass('d-none');
-      this.inputEl.disabled = true;
-      this.resultContainerEl.empty();
-    } else {
-      this.loadingEl.addClass('d-none');
-      this.inputEl.disabled = false;
-      this.inputEl.focus();
-    }
+    this.eventRefs?.forEach((e) => this.plugin.events.offref(e));
   }
 
   getItems(): Entry[] {
@@ -93,6 +82,21 @@ class SearchModal extends FuzzySuggestModal<Entry> {
 
   getItemText(item: Entry): string {
     return `${item.title} ${item.authorString} ${item.year}`;
+  }
+
+  setLoading(loading: boolean): void {
+    if (loading) {
+      this.loadingEl.removeClass('d-none');
+      this.inputEl.disabled = true;
+      this.resultContainerEl.empty();
+    } else {
+      this.loadingEl.addClass('d-none');
+      this.inputEl.disabled = false;
+      this.inputEl.focus();
+
+      // @ts-ignore: not exposed in API.
+      this.updateSuggestions();
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

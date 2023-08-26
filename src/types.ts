@@ -19,8 +19,15 @@ export const TEMPLATE_VARIABLES = {
   containerTitle:
     'Title of the container holding the reference (e.g. book title for a book chapter, or the journal title for a journal article)',
   DOI: '',
+  eprint: '',
+  eprinttype: '',
+  eventPlace: 'Location of event',
+  note: '',
   page: 'Page or page range',
+  publisher: '',
+  publisherPlace: 'Location of publisher',
   title: '',
+  titleShort: '',
   URL: '',
   year: 'Publication year',
   zoteroSelectURI: 'URI to open the reference in Zotero',
@@ -46,8 +53,15 @@ export class Library {
       authorString: entry.authorString,
       containerTitle: entry.containerTitle,
       DOI: entry.DOI,
+      eprint: entry.eprint,
+      eprinttype: entry.eprinttype,
+      eventPlace: entry.eventPlace,
+      note: entry.note,
       page: entry.page,
+      publisher: entry.publisher,
+      publisherPlace: entry.publisherPlace,
       title: entry.title,
+      titleShort: entry.titleShort,
       URL: entry.URL,
       year: entry.year?.toString(),
       zoteroSelectURI: entry.zoteroSelectURI,
@@ -74,13 +88,26 @@ export function loadEntries(
   } else if (databaseType == 'biblatex') {
     const options: BibTeXParser.ParserOptions = {
       errorHandler: (err) => {
-        console.warn('Citation plugin: error loading BibLaTeX entry:', err);
+        console.warn(
+          'Citation plugin: non-fatal error loading BibLaTeX entry:',
+          err,
+        );
       },
     };
+
     const parsed = BibTeXParser.parse(
       databaseRaw,
       options,
     ) as BibTeXParser.Bibliography;
+
+    parsed.errors.forEach((error) => {
+      console.error(
+        `Citation plugin: fatal error loading BibLaTeX entry` +
+          ` (line ${error.line}, column ${error.column}):`,
+        error.message,
+      );
+    });
+
     libraryArray = parsed.entries;
   }
 
@@ -136,13 +163,33 @@ export abstract class Entry {
    */
   public abstract page?: string;
   public abstract title?: string;
+  public abstract titleShort?: string;
   public abstract URL?: string;
+
+  public abstract eventPlace?: string;
+
+  public abstract publisher?: string;
+  public abstract publisherPlace?: string;
+
+  /**
+   * BibLaTeX-specific properties
+   */
+  public abstract eprint?: string;
+  public abstract eprinttype?: string;
 
   protected _year?: string;
   public get year(): number {
     return this._year
       ? parseInt(this._year)
       : this.issuedDate?.getUTCFullYear();
+  }
+
+  protected _note?: string[];
+
+  public get note(): string {
+    return this._note
+      ?.map((el) => el.replace(/(zotero:\/\/.+)/g, '[Link]($1)'))
+      .join('\n\n');
   }
 
   /**
@@ -184,10 +231,14 @@ export interface EntryDataCSL {
   author?: Author[];
   'container-title'?: string;
   DOI?: string;
+  'event-place'?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   issued?: { 'date-parts': [any[]] };
   page?: string;
+  publisher?: string;
+  'publisher-place'?: string;
   title?: string;
+  'title-short'?: string;
   URL?: string;
 }
 
@@ -196,6 +247,8 @@ export class EntryCSLAdapter extends Entry {
     super();
   }
 
+  eprint: string = null;
+  eprinttype: string = null;
   files: string[] = null;
 
   get id() {
@@ -226,6 +279,10 @@ export class EntryCSLAdapter extends Entry {
     return this.data.DOI;
   }
 
+  get eventPlace() {
+    return this.data['event-place'];
+  }
+
   get issuedDate() {
     if (
       !(
@@ -237,15 +294,27 @@ export class EntryCSLAdapter extends Entry {
       return null;
 
     const [year, month, day] = this.data.issued['date-parts'][0];
-    return new Date(year, (month || 1) - 1, day || 1);
+    return new Date(Date.UTC(year, (month || 1) - 1, day || 1));
   }
 
   get page() {
     return this.data.page;
   }
 
+  get publisher() {
+    return this.data.publisher;
+  }
+
+  get publisherPlace() {
+    return this.data['publisher-place'];
+  }
+
   get title() {
     return this.data.title;
+  }
+
+  get titleShort() {
+    return this.data['title-short'];
   }
 
   get URL() {
@@ -258,15 +327,21 @@ const BIBLATEX_PROPERTY_MAPPING: Record<string, string> = {
   booktitle: '_containerTitle',
   date: 'issued',
   doi: 'DOI',
+  eprint: 'eprint',
+  eprinttype: 'eprinttype',
   eventtitle: 'event',
   journal: '_containerTitle',
   journaltitle: '_containerTitle',
+  location: 'publisherPlace',
   pages: 'page',
   shortjournal: 'containerTitleShort',
   title: 'title',
   shorttitle: 'titleShort',
   url: 'URL',
+  venue: 'eventPlace',
   year: '_year',
+  publisher: 'publisher',
+  note: '_note',
 };
 
 // BibLaTeX parser returns arrays of property values (allowing for repeated
@@ -277,14 +352,19 @@ const BIBLATEX_PROPERTY_TAKE_FIRST: string[] = [
   '_containerTitle',
   'date',
   'doi',
+  'eprint',
+  'eprinttype',
   'eventtitle',
   'journaltitle',
+  'location',
   'pages',
   'shortjournal',
   'title',
   'shorttitle',
   'url',
+  'venue',
   '_year',
+  'publisher',
 ];
 
 export class EntryBibLaTeXAdapter extends Entry {
@@ -292,13 +372,19 @@ export class EntryBibLaTeXAdapter extends Entry {
   _containerTitle?: string;
   containerTitleShort?: string;
   DOI?: string;
+  eprint?: string;
+  eprinttype?: string;
   event?: string;
+  eventPlace?: string;
   issued?: string;
   page?: string;
+  publisher?: string;
+  publisherPlace?: string;
   title?: string;
   titleShort?: string;
   URL?: string;
   _year?: string;
+  _note?: string[];
 
   constructor(private data: EntryDataBibLaTeX) {
     super();

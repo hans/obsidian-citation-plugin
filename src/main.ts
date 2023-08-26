@@ -15,13 +15,15 @@ import {
   TemplateDelegate as Template,
 } from 'handlebars';
 
+
+import CitationEvents from './events';
 import {
   InsertCitationModal,
   InsertNoteLinkModal,
   InsertNoteContentModal,
   OpenNoteModal,
 } from './modals';
-
+import { VaultExt } from './obsidian-extensions.d';
 import { CitationSettingTab, CitationsPluginSettings } from './settings';
 import {
   Entry,
@@ -43,9 +45,16 @@ export default class CitationPlugin extends Plugin {
   settings: CitationsPluginSettings;
   library: Library;
 
+  // Template compilation options
+  private templateSettings = {
+    noEscape: true,
+  };
+
   private loadWorker = new WorkerManager(new LoadWorker(), {
     blockingChannel: true,
   });
+
+  events = new CitationEvents();
 
   loadErrorNotifier = new Notifier(
     'Unable to load citations. Please update Citations plugin settings.',
@@ -110,7 +119,10 @@ export default class CitationPlugin extends Plugin {
         };
 
         chokidar
-          .watch(this.settings.citationExportPath, watchOptions)
+          .watch(
+            this.resolveLibraryPath(this.settings.citationExportPath),
+            watchOptions,
+          )
           .on('change', () => {
             this.loadLibrary();
           });
@@ -128,6 +140,15 @@ export default class CitationPlugin extends Plugin {
       callback: () => {
         const modal = new OpenNoteModal(this.app, this);
         modal.open();
+      },
+    });
+
+    this.addCommand({
+      id: 'update-bib-data',
+      name: 'Refresh citation database',
+      hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'r' }],
+      callback: () => {
+        this.loadLibrary();
       },
     });
 
@@ -182,6 +203,7 @@ export default class CitationPlugin extends Plugin {
       );
 
       // Unload current library.
+      this.events.trigger('library-load-start');
       this.library = null;
 
       return FileSystemAdapter.readLocalFile(filePath)
@@ -223,6 +245,8 @@ export default class CitationPlugin extends Plugin {
             `Citation plugin: successfully loaded library with ${this.library.size} entries.`,
           );
 
+          this.events.trigger('library-load-complete');
+
           return this.library;
         })
         .catch((e) => {
@@ -252,19 +276,31 @@ export default class CitationPlugin extends Plugin {
   }
 
   get literatureNoteTitleTemplate(): Template {
-    return compileTemplate(this.settings.literatureNoteTitleTemplate);
+    return compileTemplate(
+      this.settings.literatureNoteTitleTemplate,
+      this.templateSettings,
+    );
   }
 
   get literatureNoteContentTemplate(): Template {
-    return compileTemplate(this.settings.literatureNoteContentTemplate);
+    return compileTemplate(
+      this.settings.literatureNoteContentTemplate,
+      this.templateSettings,
+    );
   }
 
   get markdownCitationTemplate(): Template {
-    return compileTemplate(this.settings.markdownCitationTemplate);
+    return compileTemplate(
+      this.settings.markdownCitationTemplate,
+      this.templateSettings,
+    );
   }
 
   get alternativeMarkdownCitationTemplate(): Template {
-    return compileTemplate(this.settings.alternativeMarkdownCitationTemplate);
+    return compileTemplate(
+      this.settings.alternativeMarkdownCitationTemplate,
+      this.templateSettings,
+    );
   }
 
   getTitleForCitekey(citekey: string): string {
@@ -340,11 +376,23 @@ export default class CitationPlugin extends Plugin {
 
   async insertLiteratureNoteLink(citekey: string): Promise<void> {
     this.getOrCreateLiteratureNoteFile(citekey)
-      .then(() => {
-        const title = this.getTitleForCitekey(citekey),
+      .then((file: TFile) => {
+        const useMarkdown: boolean = (<VaultExt>this.app.vault).getConfig(
+          'useMarkdownLinks',
+        );
+        const title = this.getTitleForCitekey(citekey);
+
+        let linkText: string;
+        if (useMarkdown) {
+          const uri = encodeURI(
+            this.app.metadataCache.fileToLinktext(file, '', false),
+          );
+          linkText = `[${title}](${uri})`;
+        } else {
           linkText = `[[${title}]]`;
-        // console.log(this.app.metadataCache.fileToLinktext(file, this.app.vault.getRoot().path, true))
-        this.editor.replaceRange(linkText, this.editor.getCursor());
+        }
+
+        this.editor.replaceSelection(linkText);
       })
       .catch(console.error);
   }
