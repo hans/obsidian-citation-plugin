@@ -1,5 +1,6 @@
 import * as BibTeXParser from '@retorquere/bibtex-parser';
 import { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
+import { has } from 'lodash';
 // Also make EntryDataBibLaTeX available to other modules
 export { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
 
@@ -31,6 +32,8 @@ export const TEMPLATE_VARIABLES = {
   URL: '',
   year: 'Publication year',
   zoteroSelectURI: 'URI to open the reference in Zotero',
+  zoteroPdfURI: 'URI to open the PDF attachment in Zotero',
+  zoteroPdfHash: 'Hash of the PDF attachment',
 };
 
 export class Library {
@@ -65,6 +68,8 @@ export class Library {
       URL: entry.URL,
       year: entry.year?.toString(),
       zoteroSelectURI: entry.zoteroSelectURI,
+      zoteroPdfURI: entry.zoteroPdfURI,
+      zoteroPdfHash: entry.zoteroPdfHash,
     };
 
     return { entry: entry.toJSON(), ...shortcuts };
@@ -197,6 +202,28 @@ export abstract class Entry {
    */
   public get zoteroSelectURI(): string {
     return `zotero://select/items/@${this.id}`;
+  }
+
+  public get zoteroPdfHash(): string {
+    const files = this.files || [];
+
+    const pdfPath = files.find((f) => f.toLowerCase().endsWith('.pdf'));
+
+    if (!pdfPath) {
+      return null;
+    }
+    const idxStorage = pdfPath.toLowerCase().indexOf('/storage/');
+    const pdfHash = pdfPath.substring(idxStorage + 9, idxStorage + 9 + 8);
+    return pdfHash;
+  }
+
+  public get zoteroPdfURI(): string {
+    const hashPdf = this.zoteroPdfHash;
+    if (hashPdf) {
+      return `zotero://open-pdf/library/items/${hashPdf}`;
+    } else {
+      return null;
+    }
   }
 
   toJSON(): Record<string, unknown> {

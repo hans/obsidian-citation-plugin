@@ -258,6 +258,30 @@ export class InsertNoteContentModal extends SearchModal {
   }
 }
 
+export class InsertZoteroLinkModal extends SearchModal {
+  constructor(app: App, plugin: CitationPlugin) {
+    super(app, plugin);
+
+    this.setInstructions([
+      { command: '↑↓', purpose: 'to navigate' },
+      {
+        command: '↵',
+        purpose: 'to insert Zotero Link to pdf',
+      },
+      { command: 'shift ↵', purpose: 'to insert Zoter Link to entry' },
+      { command: 'esc', purpose: 'to dismiss' },
+    ]);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onChooseItem(item: Entry, evt: MouseEvent | KeyboardEvent): void {
+    const isAlternative = evt instanceof KeyboardEvent && evt.shiftKey;
+    this.plugin
+      .insertZoteroLink(item.id, isAlternative)
+      .catch(console.error);
+  }
+}
+
 export class InsertCitationModal extends SearchModal {
   constructor(app: App, plugin: CitationPlugin) {
     super(app, plugin);

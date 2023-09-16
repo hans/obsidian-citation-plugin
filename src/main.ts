@@ -21,6 +21,7 @@ import {
   InsertCitationModal,
   InsertNoteLinkModal,
   InsertNoteContentModal,
+  InsertZoteroLinkModal,
   OpenNoteModal,
 } from './modals';
 import { VaultExt } from './obsidian-extensions.d';
@@ -167,6 +168,15 @@ export default class CitationPlugin extends Plugin {
       name: 'Insert literature note content in the current pane',
       callback: () => {
         const modal = new InsertNoteContentModal(this.app, this);
+        modal.open();
+      },
+    });
+
+    this.addCommand({
+      id: 'insert-zotero-link',
+      name: 'Insert Zotero link to pdf or entry',
+      callback: () => {
+        const modal = new InsertZoteroLinkModal(this.app, this);
         modal.open();
       },
     });
@@ -334,6 +344,16 @@ export default class CitationPlugin extends Plugin {
     );
   }
 
+  getEntryZoteroLinkForCitekey(citekey: string): string {
+    return `[${citekey}](zotero://select/items/${citekey})`;
+  }
+
+  getPdfZoteroLinkForCitekey(citekey: string): string {
+    const variables = this.library.getTemplateVariablesForCitekey(citekey);
+    return `[${citekey}:pdf](${variables.zoteroPdfURI})`;
+  }
+
+
   /**
    * Run a case-insensitive search for the literature note file corresponding to
    * the given citekey. If no corresponding file is found, create one.
@@ -416,5 +436,17 @@ export default class CitationPlugin extends Plugin {
     const citation = func.bind(this)(citekey);
 
     this.editor.replaceRange(citation, this.editor.getCursor());
+  }
+
+  async insertZoteroLink(
+    citekey: string,
+    alternative = false,
+  ): Promise<void> {
+    const func = alternative
+      ? this.getEntryZoteroLinkForCitekey
+      : this.getPdfZoteroLinkForCitekey;
+    const link = func.bind(this)(citekey);
+
+    this.editor.replaceRange(link, this.editor.getCursor());
   }
 }
