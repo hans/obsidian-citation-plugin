@@ -1,5 +1,6 @@
 import * as BibTeXParser from '@retorquere/bibtex-parser';
 import { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
+import { has } from 'lodash';
 // Also make EntryDataBibLaTeX available to other modules
 export { Entry as EntryDataBibLaTeX } from '@retorquere/bibtex-parser';
 
