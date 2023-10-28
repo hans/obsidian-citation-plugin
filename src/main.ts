@@ -339,21 +339,24 @@ export default class CitationPlugin extends Plugin {
    * the given citekey. If no corresponding file is found, create one.
    */
   async getOrCreateLiteratureNoteFile(citekey: string): Promise<TFile> {
-    const path = this.getPathForCitekey(citekey);
-    const normalizedPath = normalizePath(path);
+    const filePath = this.getPathForCitekey(citekey);
+    const normalizedPath = normalizePath(filePath);
 
     let file = this.app.vault.getAbstractFileByPath(normalizedPath);
     if (file == null) {
+      const splittedPath = normalizedPath.split(path.sep);
+      const fileName = splittedPath[splittedPath.length - 1].toLowerCase();
+
       // First try a case-insensitive lookup.
       const matches = this.app.vault
         .getMarkdownFiles()
-        .filter((f) => f.path.toLowerCase() == normalizedPath.toLowerCase());
+        .filter((f) => f.name.toLowerCase() == fileName);
       if (matches.length > 0) {
         file = matches[0];
       } else {
         try {
           file = await this.app.vault.create(
-            path,
+            filePath,
             this.getInitialContentForCitekey(citekey),
           );
         } catch (exc) {
