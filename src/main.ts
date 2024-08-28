@@ -380,15 +380,15 @@ export default class CitationPlugin extends Plugin {
         const useMarkdown: boolean = (<VaultExt>this.app.vault).getConfig(
           'useMarkdownLinks',
         );
-        const title = this.getTitleForCitekey(citekey);
 
         let linkText: string;
         if (useMarkdown) {
           const uri = encodeURI(
             this.app.metadataCache.fileToLinktext(file, '', false),
           );
-          linkText = `[${title}](${uri})`;
+          linkText = `[${citekey}](${uri})`;
         } else {
+          const title = this.getTitleForCitekey(citekey);
           linkText = `[[${title}]]`;
         }
 
