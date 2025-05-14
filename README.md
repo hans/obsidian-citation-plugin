@@ -53,7 +53,7 @@ You can set up your own template for both the title and content of literature no
 For example, your literature note title template can simply be `@{{citekey}}` and the content template can look like:
 ```
 ---
-title: {{title}}
+title: "{{title}}"
 authors: {{authorString}}
 year: {{year}}
 ---
