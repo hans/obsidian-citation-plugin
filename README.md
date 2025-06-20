@@ -41,6 +41,7 @@ You can set up your own template for both the title and content of literature no
 * {{eprint}}
 * {{eprinttype}}
 * {{eventPlace}}
+* {{issued}}
 * {{page}}
 * {{publisher}}
 * {{publisherPlace}}
