@@ -180,6 +180,15 @@ export default class CitationPlugin extends Plugin {
       },
     });
 
+    this.addCommand({
+      id: 'note-from-clipboard',
+      name: 'Create Literature Note from Clipboard',
+      callback: () => {
+        this.openFromClipboard();
+      },
+    });
+    //
+
     this.addSettingTab(new CitationSettingTab(this.app, this));
   }
 
@@ -193,6 +202,74 @@ export default class CitationPlugin extends Plugin {
         ? this.app.vault.adapter.getBasePath()
         : '/';
     return path.resolve(vaultRoot, rawPath);
+  }
+
+  async openFromClipboard(): Promise<void> {
+    // Piss poor code which basically just copies a lot of code from this codebase around to make it work with the clipboard
+    console.debug("Opening from clipboard");
+    const bib = await navigator.clipboard.readText();
+    let adapter: new (data: EntryData) => Entry;
+    let idKey: string;
+
+    let entries = await this.loadWorker.post({
+      databaseRaw: bib,
+      databaseType: this.settings.citationExportFormat,
+    });
+
+    switch (this.settings.citationExportFormat) {
+      case 'biblatex':
+        adapter = EntryBibLaTeXAdapter;
+        idKey = 'key';
+        break;
+      case 'csl-json':
+        adapter = EntryCSLAdapter;
+        idKey = 'id';
+        break;
+    }
+
+    const clipLibrary = new Library(
+      Object.fromEntries(
+        entries.map((e) => [(e as IIndexable)[idKey], new adapter(e)]),
+      ),
+    );
+    console.log(clipLibrary);
+
+    if (clipLibrary.size != 1) return;
+    const citekey = Object.keys(clipLibrary.entries)[0];
+
+    const unsafeTitle = this.literatureNoteTitleTemplate(
+      clipLibrary.getTemplateVariablesForCitekey(citekey),
+    );
+    const title = unsafeTitle.replace(DISALLOWED_FILENAME_CHARACTERS_RE, '_');
+
+    const _path = path.join(this.settings.literatureNoteFolder, `${title}.md`);
+    const normalizedPath = normalizePath(_path);
+
+    let file = this.app.vault.getAbstractFileByPath(normalizedPath);
+    if (file == null) {
+      // First try a case-insensitive lookup.
+      const matches = this.app.vault
+        .getMarkdownFiles()
+        .filter((f) => f.path.toLowerCase() == normalizedPath.toLowerCase());
+      if (matches.length > 0) {
+        file = matches[0];
+      } else {
+        try {
+          file = await this.app.vault.create(
+            _path,
+            this.literatureNoteContentTemplate(
+              clipLibrary.getTemplateVariablesForCitekey(citekey),
+            )
+          );
+        } catch (exc) {
+          this.literatureNoteErrorNotifier.show();
+          throw exc;
+        }
+      }
+    }
+
+    this.app.workspace.getLeaf(false).openFile(file as TFile);
+
   }
 
   async loadLibrary(): Promise<Library> {
